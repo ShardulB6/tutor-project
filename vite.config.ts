@@ -1,6 +1,6 @@
 import { defineConfig } from "vite-plus";
 import { devtools } from "@tanstack/devtools-vite";
-import tsconfigPaths from "vite-tsconfig-paths";
+// import tsconfigPaths from "vite-tsconfig-paths";
 
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 
@@ -12,12 +12,12 @@ const config = defineConfig({
   staged: {
     "*": "vp check --fix",
   },
-  fmt: {},
-  lint: { options: { typeAware: true, typeCheck: true } },
+  fmt: { ignorePatterns: ["src/routeTree.gen.ts"] },
+  lint: { options: { typeAware: true, typeCheck: true }, ignorePatterns: ["src/routeTree.gen.ts"] },
   plugins: [
     devtools(),
     cloudflare({ viteEnvironment: { name: "ssr" } }),
-    tsconfigPaths({ projects: ["./tsconfig.json"] }),
+    // tsconfigPaths({ projects: ["./tsconfig.json"] }),
     tailwindcss(),
     tanstackStart(),
     viteReact({
