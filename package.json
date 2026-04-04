@@ -13,7 +13,8 @@
     "check": "vp check",
     "deploy": "pnpm run build && wrangler deploy",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
+    "db:migrate": "pnpx wrangler d1 migrations apply DB",
+    "db:migrate:remote": "pnpx wrangler d1 migrations apply DB --remote",
     "db:pull": "drizzle-kit pull",
     "db:studio": "drizzle-kit studio",
     "prepare": "vp config"
