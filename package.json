@@ -12,6 +12,7 @@
     "test": "vp test run",
     "check": "vp check",
     "deploy": "pnpm run build && wrangler deploy",
+    "auth:generate": "pnpm dlx auth@latest generate --output src/db/auth-schema.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "pnpx wrangler d1 migrations apply DB",
     "db:migrate:remote": "pnpx wrangler d1 migrations apply DB --remote",
