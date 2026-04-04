@@ -10,3 +10,8 @@ binding = "DB"
 database_name = "tutor-db"
 database_id = "fee051e5-6124-44f2-8fa1-aef1db0aba96"
 migrations_dir = "drizzle"
+
+[observability]
+[observability.logs]
+enabled = true
+invocation_logs = true
