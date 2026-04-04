@@ -5,6 +5,10 @@ export const todos = sqliteTable("todos", {
   id: integer({ mode: "number" }).primaryKey({
     autoIncrement: true,
   }),
+  
   title: text().notNull(),
   createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .default(sql`(unixepoch())`)
+    .$onUpdate(() => sql`(unixepoch())`),
 });

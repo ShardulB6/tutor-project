@@ -8,6 +8,13 @@
       "when": 1775333324684,
       "tag": "0000_empty_frank_castle",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1775334554681,
+      "tag": "0001_cuddly_rhino",
+      "breakpoints": true
     }
   ]
 }
