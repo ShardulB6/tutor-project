@@ -1,5 +1,5 @@
 # $schema = "node_modules/wrangler/config-schema.json"
-name = "tanstack-start-app"
+name = "tutor-project"
 compatibility_date = "2025-09-02"
 compatibility_flags = ["nodejs_compat"]
 main = "@tanstack/react-start/server-entry"
