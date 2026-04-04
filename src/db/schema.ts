@@ -27,6 +27,10 @@ export const notebooks = sqliteTable("notebook", {
 });
 
 export const chathistory = sqliteTable("chathistory", {
-  id: integer({ mode: "number" }),
+  id: integer({ mode: "number" }).primaryKey({
+    autoIncrement: true,
+  }),
   notebookID: integer({ mode: "number" }).primaryKey(),
 });
+
+export const messages = sqliteTable("messages", {});
