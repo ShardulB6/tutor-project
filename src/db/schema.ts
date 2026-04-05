@@ -9,6 +9,12 @@ type Brand<T, TBrand extends string> = T & { readonly __brand: TBrand };
 export type NotebookId = Brand<string, "NotebookId">;
 export type ThreadId = Brand<string, "ThreadId">;
 export type MessageId = Brand<string, "MessageId">;
+export type FilePart = {
+  type: "file";
+  fileName: string;
+  mediaType: string;
+  url: string;
+};
 
 export const notebooks = sqliteTable("notebook", {
   title: text().notNull(),
@@ -47,6 +53,9 @@ export const messages = sqliteTable("messages", {
     .$defaultFn(() => crypto.randomUUID() as MessageId),
   roles: text().notNull(),
   message: text().notNull(),
+  fileparts: text("fileparts", { mode: "json" })
+    .$type<FilePart[] | null>()
+    .default(sql`null`),
   threadID: text("threadID")
     .$type<ThreadId>()
     .references(() => threads.id),
