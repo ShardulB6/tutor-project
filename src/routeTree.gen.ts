@@ -9,9 +9,27 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as LoginPageRouteImport } from './routes/loginPage'
+import { Route as HomepageRouteImport } from './routes/Homepage'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginPageRoute = LoginPageRouteImport.update({
+  id: '/loginPage',
+  path: '/loginPage',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomepageRoute = HomepageRouteImport.update({
+  id: '/Homepage',
+  path: '/Homepage',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -25,32 +43,71 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/Homepage': typeof HomepageRoute
+  '/loginPage': typeof LoginPageRoute
+  '/settings': typeof SettingsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/Homepage': typeof HomepageRoute
+  '/loginPage': typeof LoginPageRoute
+  '/settings': typeof SettingsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/Homepage': typeof HomepageRoute
+  '/loginPage': typeof LoginPageRoute
+  '/settings': typeof SettingsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/auth/$'
+  fullPaths: '/' | '/Homepage' | '/loginPage' | '/settings' | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/auth/$'
-  id: '__root__' | '/' | '/api/auth/$'
+  to: '/' | '/Homepage' | '/loginPage' | '/settings' | '/api/auth/$'
+  id:
+    | '__root__'
+    | '/'
+    | '/Homepage'
+    | '/loginPage'
+    | '/settings'
+    | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  HomepageRoute: typeof HomepageRoute
+  LoginPageRoute: typeof LoginPageRoute
+  SettingsRoute: typeof SettingsRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/loginPage': {
+      id: '/loginPage'
+      path: '/loginPage'
+      fullPath: '/loginPage'
+      preLoaderRoute: typeof LoginPageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/Homepage': {
+      id: '/Homepage'
+      path: '/Homepage'
+      fullPath: '/Homepage'
+      preLoaderRoute: typeof HomepageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -70,6 +127,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  HomepageRoute: HomepageRoute,
+  LoginPageRoute: LoginPageRoute,
+  SettingsRoute: SettingsRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

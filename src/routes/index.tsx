@@ -3,5 +3,13 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/")({ component: App });
 
 function App() {
-  return <div>Hello World</div>;
+  return (
+    <div>
+      <div>File drop off and file deletion</div>
+
+      <div>Chat interface</div>
+
+      <div>generate flashcards and etc</div>
+    </div>
+  );
 }
