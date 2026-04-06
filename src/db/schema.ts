@@ -60,3 +60,19 @@ export const messages = sqliteTable("messages", {
     .$type<ThreadId>()
     .references(() => threads.id),
 });
+
+export const Pdf = sqliteTable("pdf", {
+  id: text("id")
+    .$type<string>()
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: text().notNull(),
+  data: text().notNull(),
+  userID: text("userID")
+    .$type<authSchema.UserId>()
+    .references(() => authSchema.user.id),
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
+  updateat: integer("updated_at", { mode: "timestamp" })
+    .default(sql`(unixepoch())`)
+    .$onUpdate(() => sql`(unixepoch())`),
+});
