@@ -9,31 +9,36 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as LoginPageRouteImport } from './routes/loginPage'
-import { Route as HomepageRouteImport } from './routes/Homepage'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as SidebarRouteImport } from './routes/_sidebar'
+import { Route as SidebarIndexRouteImport } from './routes/_sidebar/index'
+import { Route as SidebarSettingsRouteImport } from './routes/_sidebar/settings'
+import { Route as SidebarHomepageRouteImport } from './routes/_sidebar/Homepage'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LoginPageRoute = LoginPageRouteImport.update({
   id: '/loginPage',
   path: '/loginPage',
   getParentRoute: () => rootRouteImport,
 } as any)
-const HomepageRoute = HomepageRouteImport.update({
-  id: '/Homepage',
-  path: '/Homepage',
+const SidebarRoute = SidebarRouteImport.update({
+  id: '/_sidebar',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
+const SidebarIndexRoute = SidebarIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => SidebarRoute,
+} as any)
+const SidebarSettingsRoute = SidebarSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => SidebarRoute,
+} as any)
+const SidebarHomepageRoute = SidebarHomepageRouteImport.update({
+  id: '/Homepage',
+  path: '/Homepage',
+  getParentRoute: () => SidebarRoute,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
@@ -42,58 +47,51 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/Homepage': typeof HomepageRoute
+  '/': typeof SidebarIndexRoute
   '/loginPage': typeof LoginPageRoute
-  '/settings': typeof SettingsRoute
+  '/Homepage': typeof SidebarHomepageRoute
+  '/settings': typeof SidebarSettingsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/Homepage': typeof HomepageRoute
   '/loginPage': typeof LoginPageRoute
-  '/settings': typeof SettingsRoute
+  '/Homepage': typeof SidebarHomepageRoute
+  '/settings': typeof SidebarSettingsRoute
+  '/': typeof SidebarIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/Homepage': typeof HomepageRoute
+  '/_sidebar': typeof SidebarRouteWithChildren
   '/loginPage': typeof LoginPageRoute
-  '/settings': typeof SettingsRoute
+  '/_sidebar/Homepage': typeof SidebarHomepageRoute
+  '/_sidebar/settings': typeof SidebarSettingsRoute
+  '/_sidebar/': typeof SidebarIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/Homepage' | '/loginPage' | '/settings' | '/api/auth/$'
+  fullPaths: '/' | '/loginPage' | '/Homepage' | '/settings' | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/Homepage' | '/loginPage' | '/settings' | '/api/auth/$'
+  to: '/loginPage' | '/Homepage' | '/settings' | '/' | '/api/auth/$'
   id:
     | '__root__'
-    | '/'
-    | '/Homepage'
+    | '/_sidebar'
     | '/loginPage'
-    | '/settings'
+    | '/_sidebar/Homepage'
+    | '/_sidebar/settings'
+    | '/_sidebar/'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  HomepageRoute: typeof HomepageRoute
+  SidebarRoute: typeof SidebarRouteWithChildren
   LoginPageRoute: typeof LoginPageRoute
-  SettingsRoute: typeof SettingsRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/loginPage': {
       id: '/loginPage'
       path: '/loginPage'
@@ -101,19 +99,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginPageRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/Homepage': {
-      id: '/Homepage'
-      path: '/Homepage'
-      fullPath: '/Homepage'
-      preLoaderRoute: typeof HomepageRouteImport
+    '/_sidebar': {
+      id: '/_sidebar'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof SidebarRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
+    '/_sidebar/': {
+      id: '/_sidebar/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof SidebarIndexRouteImport
+      parentRoute: typeof SidebarRoute
+    }
+    '/_sidebar/settings': {
+      id: '/_sidebar/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SidebarSettingsRouteImport
+      parentRoute: typeof SidebarRoute
+    }
+    '/_sidebar/Homepage': {
+      id: '/_sidebar/Homepage'
+      path: '/Homepage'
+      fullPath: '/Homepage'
+      preLoaderRoute: typeof SidebarHomepageRouteImport
+      parentRoute: typeof SidebarRoute
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -125,11 +137,24 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface SidebarRouteChildren {
+  SidebarHomepageRoute: typeof SidebarHomepageRoute
+  SidebarSettingsRoute: typeof SidebarSettingsRoute
+  SidebarIndexRoute: typeof SidebarIndexRoute
+}
+
+const SidebarRouteChildren: SidebarRouteChildren = {
+  SidebarHomepageRoute: SidebarHomepageRoute,
+  SidebarSettingsRoute: SidebarSettingsRoute,
+  SidebarIndexRoute: SidebarIndexRoute,
+}
+
+const SidebarRouteWithChildren =
+  SidebarRoute._addFileChildren(SidebarRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  HomepageRoute: HomepageRoute,
+  SidebarRoute: SidebarRouteWithChildren,
   LoginPageRoute: LoginPageRoute,
-  SettingsRoute: SettingsRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
