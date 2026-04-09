@@ -9,17 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as LoginPageRouteImport } from './routes/loginPage'
-import { Route as SidebarRouteImport } from './routes/_sidebar'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
-const LoginPageRoute = LoginPageRouteImport.update({
-  id: '/loginPage',
-  path: '/loginPage',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SidebarRoute = SidebarRouteImport.update({
-  id: '/_sidebar',
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
@@ -29,49 +29,49 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof SidebarRoute
-  '/loginPage': typeof LoginPageRoute
+  '/': typeof AuthenticatedRoute
+  '/login': typeof LoginRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof SidebarRoute
-  '/loginPage': typeof LoginPageRoute
+  '/': typeof AuthenticatedRoute
+  '/login': typeof LoginRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/_sidebar': typeof SidebarRoute
-  '/loginPage': typeof LoginPageRoute
+  '/_authenticated': typeof AuthenticatedRoute
+  '/login': typeof LoginRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/loginPage' | '/api/auth/$'
+  fullPaths: '/' | '/login' | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/loginPage' | '/api/auth/$'
-  id: '__root__' | '/_sidebar' | '/loginPage' | '/api/auth/$'
+  to: '/' | '/login' | '/api/auth/$'
+  id: '__root__' | '/_authenticated' | '/login' | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  SidebarRoute: typeof SidebarRoute
-  LoginPageRoute: typeof LoginPageRoute
+  AuthenticatedRoute: typeof AuthenticatedRoute
+  LoginRoute: typeof LoginRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/loginPage': {
-      id: '/loginPage'
-      path: '/loginPage'
-      fullPath: '/loginPage'
-      preLoaderRoute: typeof LoginPageRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_sidebar': {
-      id: '/_sidebar'
+    '/_authenticated': {
+      id: '/_authenticated'
       path: ''
       fullPath: '/'
-      preLoaderRoute: typeof SidebarRouteImport
+      preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
@@ -85,8 +85,8 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  SidebarRoute: SidebarRoute,
-  LoginPageRoute: LoginPageRoute,
+  AuthenticatedRoute: AuthenticatedRoute,
+  LoginRoute: LoginRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
