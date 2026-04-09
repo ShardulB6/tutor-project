@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LoginForm } from "@/components/login-form";
 import { GalleryVerticalEnd } from "lucide-react";
-import { auth } from "@/lib/auth";
+import { authClient } from "@/lib/auth-client";
 import * as zod from "zod";
 
 const loginSchema = zod.object({
@@ -14,13 +14,28 @@ export const Route = createFileRoute("/login")({
 });
 
 function RouteComponent() {
-  const signIn = async (email: string, password: string) => {
-    await auth.api.signInEmail({
-      body: {
+  const signInOrSignUp = async (email: string, password: string) => {
+    const name = email.split("@")[0] || email;
+
+    try {
+      await authClient.signIn.email({
         email,
         password,
-      },
-    });
+      });
+    } catch (error) {
+      const code =
+        error && typeof error === "object" && "code" in error ? String(error.code) : undefined;
+
+      if (code !== "USER_NOT_FOUND" && code !== "USER_EMAIL_NOT_FOUND") {
+        throw error;
+      }
+
+      await authClient.signUp.email({
+        email,
+        name,
+        password,
+      });
+    }
   };
 
   return (
@@ -44,7 +59,7 @@ function RouteComponent() {
                   password: formData.get("password"),
                 });
 
-                await signIn(parsed.email, parsed.password);
+                await signInOrSignUp(parsed.email, parsed.password);
               }}
             />
           </div>
