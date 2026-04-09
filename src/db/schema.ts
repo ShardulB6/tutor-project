@@ -9,12 +9,6 @@ type Brand<T, TBrand extends string> = T & { readonly __brand: TBrand };
 export type NotebookId = Brand<string, "NotebookId">;
 export type ThreadId = Brand<string, "ThreadId">;
 export type MessageId = Brand<string, "MessageId">;
-export type FilePart = {
-  type: "file";
-  fileName: string;
-  mediaType: string;
-  url: string;
-};
 
 export const notebooks = sqliteTable("notebook", {
   title: text().notNull(),
@@ -53,26 +47,7 @@ export const messages = sqliteTable("messages", {
     .$defaultFn(() => crypto.randomUUID() as MessageId),
   roles: text().notNull(),
   message: text().notNull(),
-  fileparts: text("fileparts", { mode: "json" })
-    .$type<FilePart[] | null>()
-    .default(sql`null`),
   threadID: text("threadID")
     .$type<ThreadId>()
     .references(() => threads.id),
-});
-
-export const Pdf = sqliteTable("pdf", {
-  id: text("id")
-    .$type<string>()
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  name: text().notNull(),
-  data: text().notNull(),
-  userID: text("userID")
-    .$type<authSchema.UserId>()
-    .references(() => authSchema.user.id),
-  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
-  updateat: integer("updated_at", { mode: "timestamp" })
-    .default(sql`(unixepoch())`)
-    .$onUpdate(() => sql`(unixepoch())`),
 });
