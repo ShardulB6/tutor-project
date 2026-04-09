@@ -11,9 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginPageRouteImport } from './routes/loginPage'
 import { Route as SidebarRouteImport } from './routes/_sidebar'
-import { Route as SidebarIndexRouteImport } from './routes/_sidebar/index'
-import { Route as SidebarSettingsRouteImport } from './routes/_sidebar/settings'
-import { Route as SidebarHomepageRouteImport } from './routes/_sidebar/Homepage'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const LoginPageRoute = LoginPageRouteImport.update({
@@ -25,21 +22,6 @@ const SidebarRoute = SidebarRouteImport.update({
   id: '/_sidebar',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SidebarIndexRoute = SidebarIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => SidebarRoute,
-} as any)
-const SidebarSettingsRoute = SidebarSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => SidebarRoute,
-} as any)
-const SidebarHomepageRoute = SidebarHomepageRouteImport.update({
-  id: '/Homepage',
-  path: '/Homepage',
-  getParentRoute: () => SidebarRoute,
-} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -47,45 +29,31 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof SidebarIndexRoute
+  '/': typeof SidebarRoute
   '/loginPage': typeof LoginPageRoute
-  '/Homepage': typeof SidebarHomepageRoute
-  '/settings': typeof SidebarSettingsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof SidebarRoute
   '/loginPage': typeof LoginPageRoute
-  '/Homepage': typeof SidebarHomepageRoute
-  '/settings': typeof SidebarSettingsRoute
-  '/': typeof SidebarIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/_sidebar': typeof SidebarRouteWithChildren
+  '/_sidebar': typeof SidebarRoute
   '/loginPage': typeof LoginPageRoute
-  '/_sidebar/Homepage': typeof SidebarHomepageRoute
-  '/_sidebar/settings': typeof SidebarSettingsRoute
-  '/_sidebar/': typeof SidebarIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/loginPage' | '/Homepage' | '/settings' | '/api/auth/$'
+  fullPaths: '/' | '/loginPage' | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/loginPage' | '/Homepage' | '/settings' | '/' | '/api/auth/$'
-  id:
-    | '__root__'
-    | '/_sidebar'
-    | '/loginPage'
-    | '/_sidebar/Homepage'
-    | '/_sidebar/settings'
-    | '/_sidebar/'
-    | '/api/auth/$'
+  to: '/' | '/loginPage' | '/api/auth/$'
+  id: '__root__' | '/_sidebar' | '/loginPage' | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  SidebarRoute: typeof SidebarRouteWithChildren
+  SidebarRoute: typeof SidebarRoute
   LoginPageRoute: typeof LoginPageRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
@@ -106,27 +74,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SidebarRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_sidebar/': {
-      id: '/_sidebar/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof SidebarIndexRouteImport
-      parentRoute: typeof SidebarRoute
-    }
-    '/_sidebar/settings': {
-      id: '/_sidebar/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SidebarSettingsRouteImport
-      parentRoute: typeof SidebarRoute
-    }
-    '/_sidebar/Homepage': {
-      id: '/_sidebar/Homepage'
-      path: '/Homepage'
-      fullPath: '/Homepage'
-      preLoaderRoute: typeof SidebarHomepageRouteImport
-      parentRoute: typeof SidebarRoute
-    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -137,23 +84,8 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface SidebarRouteChildren {
-  SidebarHomepageRoute: typeof SidebarHomepageRoute
-  SidebarSettingsRoute: typeof SidebarSettingsRoute
-  SidebarIndexRoute: typeof SidebarIndexRoute
-}
-
-const SidebarRouteChildren: SidebarRouteChildren = {
-  SidebarHomepageRoute: SidebarHomepageRoute,
-  SidebarSettingsRoute: SidebarSettingsRoute,
-  SidebarIndexRoute: SidebarIndexRoute,
-}
-
-const SidebarRouteWithChildren =
-  SidebarRoute._addFileChildren(SidebarRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
-  SidebarRoute: SidebarRouteWithChildren,
+  SidebarRoute: SidebarRoute,
   LoginPageRoute: LoginPageRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
