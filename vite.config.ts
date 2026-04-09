@@ -15,6 +15,9 @@ const config = defineConfig({
   },
   fmt: { ignorePatterns },
   lint: { options: { typeAware: true, typeCheck: true }, ignorePatterns },
+  resolve: {
+    tsconfigPaths: true,
+  },
   plugins: [
     devtools(),
     cloudflare({ viteEnvironment: { name: "ssr" } }),
