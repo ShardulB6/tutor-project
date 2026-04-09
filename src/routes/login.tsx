@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LoginForm } from "@/components/login-form";
 import { GalleryVerticalEnd } from "lucide-react";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "#/lib/auth/auth-client";
 import * as zod from "zod";
 
 const loginSchema = zod.object({
