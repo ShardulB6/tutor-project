@@ -2,7 +2,6 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { getSession } from "#/lib/auth/auth.functions";
 
 export const Route = createFileRoute("/_authenticated")({
-  component: RouteComponent,
   beforeLoad: async () => {
     const session = await getSession();
 
@@ -13,7 +12,3 @@ export const Route = createFileRoute("/_authenticated")({
     return { user: session.user };
   },
 });
-
-function RouteComponent() {
-  return <div>Hello "/_authenticated"!</div>;
-}
