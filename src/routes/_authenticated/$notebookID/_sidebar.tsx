@@ -9,7 +9,7 @@ function RouteComponent() {
   return (
     <div>
       <div>Hello "/_authenticated/{notebookID}"!</div>
-      {/* <Outlet /> */}
+      <Outlet />
     </div>
   );
 }
