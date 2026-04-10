@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { getSession } from "@/lib/functions/auth.functions";
+import { getSession } from "#/lib/auth/auth.functions";
 
 export const Route = createFileRoute("/_authenticated")({
   component: RouteComponent,

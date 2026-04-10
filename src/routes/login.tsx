@@ -1,43 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { LoginForm } from "@/components/login-form";
 import { GalleryVerticalEnd } from "lucide-react";
 import { authClient } from "#/lib/auth/auth-client";
-import * as zod from "zod";
-
-const loginSchema = zod.object({
-  email: zod.email(),
-  password: zod.string().min(1),
-});
 
 export const Route = createFileRoute("/login")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const signInOrSignUp = async (email: string, password: string) => {
-    const name = email.split("@")[0] || email;
-
-    try {
-      await authClient.signIn.email({
-        email,
-        password,
-      });
-    } catch (error) {
-      const code =
-        error && typeof error === "object" && "code" in error ? String(error.code) : undefined;
-
-      if (code !== "USER_NOT_FOUND" && code !== "USER_EMAIL_NOT_FOUND") {
-        throw error;
-      }
-
-      await authClient.signUp.email({
-        email,
-        name,
-        password,
-      });
-    }
-  };
-
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
       <div className="flex flex-col gap-4 p-6 md:p-10">
@@ -51,17 +20,12 @@ function RouteComponent() {
         </div>
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs">
-            <LoginForm
-              onSubmit={async (event) => {
-                const formData = new FormData(event.currentTarget);
-                const parsed = loginSchema.parse({
-                  email: formData.get("email"),
-                  password: formData.get("password"),
-                });
-
-                await signInOrSignUp(parsed.email, parsed.password);
-              }}
-            />
+            <button
+              onClick={() => authClient.signIn.social({ provider: "github" })}
+              className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent"
+            >
+              Sign in with GitHub
+            </button>
           </div>
         </div>
       </div>
