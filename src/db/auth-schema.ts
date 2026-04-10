@@ -1,12 +1,8 @@
 import { relations, sql } from "drizzle-orm";
 import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
 
-type Brand<T, TBrand extends string> = T & { readonly __brand: TBrand };
-
-export type UserId = Brand<string, "UserId">;
-
 export const user = sqliteTable("user", {
-  id: text("id").$type<UserId>().primaryKey(),
+  id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   emailVerified: integer("email_verified", { mode: "boolean" }).default(false).notNull(),

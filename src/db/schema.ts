@@ -16,9 +16,7 @@ export const notebooks = sqliteTable("notebook", {
     .$type<NotebookId>()
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID() as NotebookId),
-  userID: text("userID")
-    .$type<authSchema.UserId>()
-    .references(() => authSchema.user.id),
+  userID: text("userID").references(() => authSchema.user.id),
   createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
   updatedAt: integer("updated_at", { mode: "timestamp" })
     .default(sql`(unixepoch())`)
