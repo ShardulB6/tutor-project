@@ -1,11 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createNotebook } from "#/lib/functions/notebooks.functions";
 
+
 export const Route = createFileRoute("/_authenticated/")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+
+
   return (
     <div className="p-4">
       <div>
@@ -20,7 +23,9 @@ function RouteComponent() {
         </button>
       </div>
       <div>
-        <div className="border rounded-sm mb-4 mt-4 w-30 h-30"></div>
+        <div className="border rounded-sm mb-4 mt-4 w-30 h-30">
+          <h3 className="text-lg font-semibold">Notebook Title</h3>
+        </div>
       </div>
     </div>
   );
