@@ -1,13 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createNotebook } from "#/lib/functions/notebooks.functions";
-
+import { createNotebook, getNotebooks } from "#/lib/functions/notebooks.functions";
 
 export const Route = createFileRoute("/_authenticated/")({
+  loader: async () => {
+    const notebooks = await getNotebooks();
+
+    return { notebooks };
+  },
+
   component: RouteComponent,
 });
 
 function RouteComponent() {
-
+  const { notebooks } = Route.useLoaderData();
 
   return (
     <div className="p-4">
@@ -22,11 +27,15 @@ function RouteComponent() {
           Create Notebook
         </button>
       </div>
-      <div>
-        <div className="border rounded-sm mb-4 mt-4 w-30 h-30">
-          <h3 className="text-lg font-semibold">Notebook Title</h3>
-        </div>
-      </div>
+      <ul>
+        {notebooks.map((notebook) => (
+          <li key={notebook.id}>
+            <div className="border rounded-sm mb-4 mt-4 w-30 h-30">
+              <h2 className="text-lg font-semibold">{notebook.title}</h2>
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
