@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createNotebook, getNotebooks } from "#/lib/functions/notebooks.functions";
-import { title } from "process";
+
 
 export const Route = createFileRoute("/_authenticated/")({
   loader: async () => {
@@ -14,7 +14,9 @@ export const Route = createFileRoute("/_authenticated/")({
 
 function RouteComponent() {
   const { notebooks } = Route.useLoaderData();
-
+  const createNotebook = async (title: string) => {
+    
+  }
 
 
   return (
