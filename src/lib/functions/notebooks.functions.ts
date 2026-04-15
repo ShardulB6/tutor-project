@@ -62,3 +62,19 @@ export const updateServerNotebook = createServerFn({ method: "POST" })
 
     return notebook;
   });
+
+export const deleteServerNotebook = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      id: z.string().brand<"NotebookId">(),
+    }),
+  )
+  .handler(async ({ data }) => {
+    const session = await ensureSession();
+
+    await db
+      .delete(NotebooksTable)
+      .where(and(eq(NotebooksTable.id, data.id), eq(NotebooksTable.userID, session.user.id)));
+
+    return { success: true };
+  });
