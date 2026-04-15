@@ -5,14 +5,14 @@ import { db } from "#/db";
 import { notebooks } from "#/db/schema";
 import { eq } from "drizzle-orm";
 
-export const getNotebooks = createServerFn({ method: "GET" }).handler(async () => {
+export const getServerNotebooks = createServerFn({ method: "GET" }).handler(async () => {
   const session = await ensureSession();
   const notebooksResult = db.select().from(notebooks).where(eq(notebooks.userID, session.user.id));
 
   return notebooksResult;
 });
 
-export const createNotebook = createServerFn({ method: "POST" })
+export const createServerNotebook = createServerFn({ method: "POST" })
   .inputValidator(z.object({ title: z.string().min(1) }))
   .handler(async ({ data }: { data: { title: string } }) => {
     const session = await ensureSession();
@@ -27,4 +27,3 @@ export const createNotebook = createServerFn({ method: "POST" })
 
     return notebook;
   });
-

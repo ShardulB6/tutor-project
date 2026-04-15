@@ -1,11 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { createNotebook, getNotebooks } from "#/lib/functions/notebooks.functions";
-
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createServerNotebook, getServerNotebooks } from "#/lib/functions/notebooks.functions";
+import { useServerFn } from "@tanstack/react-start";
 
 export const Route = createFileRoute("/_authenticated/")({
   loader: async () => {
-    const notebooks = await getNotebooks();
-    
+    const notebooks = await getServerNotebooks();
+
     return { notebooks };
   },
 
@@ -14,18 +14,21 @@ export const Route = createFileRoute("/_authenticated/")({
 
 function RouteComponent() {
   const { notebooks } = Route.useLoaderData();
-  const createNotebook = async (title: string) => {
-    
-  }
-
+  const router = useRouter();
+  const createNotebook = useServerFn(createServerNotebook);
 
   return (
     <div className="p-4">
       <div>
         <h1 className="text-2xl font-bold">Notebooks</h1>
         <button
-          onClick={() => {
-            alert("Create notebook");
+          onClick={async () => {
+            await createNotebook({
+              data: {
+                title: "New Notebook",
+              },
+            });
+            await router.load();
           }}
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
         >
