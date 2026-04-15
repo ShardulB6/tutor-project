@@ -13,7 +13,6 @@ export const Route = createFileRoute("/_authenticated/")({
 });
 
 function RouteComponent() {
-  const { notebooks } = Route.useLoaderData();
   const router = useRouter();
   const createNotebook = useServerFn(createServerNotebook);
 
@@ -34,16 +33,22 @@ function RouteComponent() {
         >
           Create Notebook
         </button>
+        <NotebooksComponent />
       </div>
-      <ul>
-        {notebooks.map((notebook) => (
-          <li key={notebook.id}>
-            <div className="border rounded-sm mb-4 mt-4 w-30 h-30">
-              <h2 className="text-lg font-semibold">{notebook.title}</h2>
-            </div>
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }
+
+const NotebooksComponent = () => {
+  const { notebooks } = Route.useLoaderData();
+
+  return (
+    <div className="flex flex-row gap-4 flex-wrap">
+      {notebooks.map((notebook) => (
+        <div key={notebook.id} className="border rounded-sm mb-4 w-30 h-30">
+          <h2 className="text-lg font-semibold">{notebook.title}</h2>
+        </div>
+      ))}
+    </div>
+  );
+};
