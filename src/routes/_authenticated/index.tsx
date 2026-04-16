@@ -1,6 +1,7 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { createServerNotebook, getServerNotebooks } from "#/lib/functions/notebooks.functions";
 import { useServerFn } from "@tanstack/react-start";
+import { CardImage } from "@/components/ui/MySpecialUI/NotebookCard";
 
 export const Route = createFileRoute("/_authenticated/")({
   loader: async () => {
@@ -44,11 +45,15 @@ const NotebooksComponent = () => {
 
   return (
     <div className="flex flex-row gap-4 flex-wrap">
-      {notebooks.map((notebook) => (
-        <div key={notebook.id} className="border rounded-sm mb-4 w-30 h-30">
-          <h2 className="text-lg font-semibold">{notebook.title}</h2>
-        </div>
-      ))}
+\     Card
     </div>
+
+    // <div className="flex flex-row gap-4 flex-wrap">
+    //   {notebooks.map((notebook) => (
+    //     <div key={notebook.id} className="border rounded-sm mb-4 w-30 h-30">
+    //       <h2 className="text-lg font-semibold">{notebook.title}</h2>
+    //     </div>
+    //   ))}
+    // </div>
   );
 };
