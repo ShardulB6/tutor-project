@@ -1,5 +1,4 @@
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardAction,
@@ -7,30 +6,33 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 
-export function CardImage() {
+type CardImageProps = {
+  title: string;
+  description?: string;
+  imageSrc?: string;
+  dateCreated: string;
+};
+
+export function CardImage({ title, imageSrc, dateCreated }: CardImageProps) {
   return (
-    <Card className="relative mx-auto w-full max-w-sm pt-0">
+    <Card className="relative mx-autow-full max-w-sm border-0 pt-0 shadow-none ">
       <div className="absolute inset-0 z-30 aspect-video bg-black/35" />
       <img
-        src="https://avatar.vercel.sh/shadcn1"
-        alt="Event cover"
-        className="relative z-20 aspect-video w-full object-cover brightness-60 grayscale dark:brightness-40"
+        src={imageSrc}
+        alt={title}
+        className="relative z-20 aspect-video w-full rounded-t-lg object-cover brightness-60 grayscale dark:brightness-40"
       />
       <CardHeader>
-        <CardAction>
-          <Badge variant="secondary">Featured</Badge>
-        </CardAction>
-        <CardTitle>Design systems meetup</CardTitle>
-        <CardDescription>
-          A practical talk on component APIs, accessibility, and shipping
-          faster.
-        </CardDescription>
+        <CardAction></CardAction>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>Created on {dateCreated}</CardDescription>
       </CardHeader>
-      <CardFooter>
-        <Button className="w-full">View Event</Button>
+      <CardFooter className="flex flex-col gap-2">
+        <Button className="w-full">Open Notebook</Button>
+        <Button className="w-full">Delete Notebook</Button>
       </CardFooter>
     </Card>
-  )
+  );
 }

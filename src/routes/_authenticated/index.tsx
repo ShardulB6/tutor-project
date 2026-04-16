@@ -18,14 +18,15 @@ function RouteComponent() {
   const createNotebook = useServerFn(createServerNotebook);
 
   return (
-    <div className="p-4">
+    <div className="p-4 gap-4 mx-auto">
       <div>
-        <h1 className="text-2xl font-bold">Notebooks</h1>
+        <h1 className="text-2xl mx-auto font-bold">Notebooks</h1>
         <button
           onClick={async () => {
             await createNotebook({
               data: {
-                title: "New Notebook",
+                title:
+                  "New Notebookdsfdsfsdfsdfsdfsdfsdfsdfsdfsdsadfsdfsdfsdxcvzsefvgrbvfdthbfgbvbctbcv",
               },
             });
             await router.load();
@@ -34,8 +35,8 @@ function RouteComponent() {
         >
           Create Notebook
         </button>
-        <NotebooksComponent />
       </div>
+      <NotebooksComponent />
     </div>
   );
 }
@@ -44,16 +45,15 @@ const NotebooksComponent = () => {
   const { notebooks } = Route.useLoaderData();
 
   return (
-    <div className="flex flex-row gap-4 flex-wrap">
-\     Card
+    <div className="flex flex-row gap-4 flex-wrap mt-6 ">
+      {notebooks.map((notebook) => (
+        <CardImage
+          key={notebook.id}
+          title={notebook.title}
+          imageSrc={"https://avatar.vercel.sh/shadcn1"}
+          dateCreated={notebook.createdAt ? notebook.createdAt.toLocaleDateString() : "Unknown"}
+        />
+      ))}
     </div>
-
-    // <div className="flex flex-row gap-4 flex-wrap">
-    //   {notebooks.map((notebook) => (
-    //     <div key={notebook.id} className="border rounded-sm mb-4 w-30 h-30">
-    //       <h2 className="text-lg font-semibold">{notebook.title}</h2>
-    //     </div>
-    //   ))}
-    // </div>
   );
 };
