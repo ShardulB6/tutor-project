@@ -1,5 +1,9 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { createServerNotebook, getServerNotebooks } from "#/lib/functions/notebooks.functions";
+import {
+  createServerNotebook,
+  deleteServerNotebook,
+  getServerNotebooks,
+} from "#/lib/functions/notebooks.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { CardImage } from "@/components/ui/MySpecialUI/NotebookCard";
 
@@ -43,6 +47,8 @@ function RouteComponent() {
 
 const NotebooksComponent = () => {
   const { notebooks } = Route.useLoaderData();
+  const router = useRouter();
+  const deleteNotebook = useServerFn(deleteServerNotebook);
 
   return (
     <div className="flex flex-row gap-4 flex-wrap mt-6 ">
@@ -52,6 +58,10 @@ const NotebooksComponent = () => {
           title={notebook.title}
           imageSrc={"https://avatar.vercel.sh/shadcn1"}
           dateCreated={notebook.createdAt ? notebook.createdAt.toLocaleDateString() : "Unknown"}
+          onDelete={async () => {
+            await deleteNotebook({ data: { id: notebook.id } });
+            await router.load();
+          }}
         />
       ))}
     </div>

@@ -13,9 +13,10 @@ type CardImageProps = {
   description?: string;
   imageSrc?: string;
   dateCreated: string;
+  onDelete?: () => void | Promise<void>;
 };
 
-export function CardImage({ title, imageSrc, dateCreated }: CardImageProps) {
+export function CardImage({ title, imageSrc, dateCreated, onDelete }: CardImageProps) {
   return (
     <Card className="relative mx-autow-full max-w-sm border-0 pt-0 shadow-none ">
       <div className="absolute inset-0 z-30 aspect-video bg-black/35" />
@@ -31,7 +32,11 @@ export function CardImage({ title, imageSrc, dateCreated }: CardImageProps) {
       </CardHeader>
       <CardFooter className="flex flex-col gap-2">
         <Button className="w-full">Open Notebook</Button>
-        <Button className="w-full">Delete Notebook</Button>
+        {onDelete ? (
+          <Button className="w-full" variant="destructive" onClick={onDelete}>
+            Delete Notebook
+          </Button>
+        ) : null}
       </CardFooter>
     </Card>
   );
