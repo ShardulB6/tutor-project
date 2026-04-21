@@ -6,6 +6,7 @@ import {
 } from "#/lib/functions/notebooks.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { CardImage } from "@/components/ui/MySpecialUI/NotebookCard";
+import { DialogDemo } from "@/components/ui/MySpecialUI/PopUpCreateNotebook";
 
 export const Route = createFileRoute("/_authenticated/")({
   loader: async () => {
@@ -25,12 +26,13 @@ function RouteComponent() {
     <div className="p-4 gap-4 mx-auto">
       <div>
         <h1 className="text-2xl mx-auto font-bold">Notebooks</h1>
-        <button
+
+        {/* <button
           onClick={async () => {
             await createNotebook({
               data: {
                 title:
-                  "New Notebookdsfdsfsdfsdfsdfsdfsdfsdfsdfsdsadfsdfsdfsdxcvzsefvgrbvfdthbfgbvbctbcv",
+                  "New Notebook",
               },
             });
             await router.load();
@@ -38,9 +40,10 @@ function RouteComponent() {
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer"
         >
           Create Notebook
-        </button>
+        </button> */}
       </div>
       <NotebooksComponent />
+      
     </div>
   );
 }
@@ -67,3 +70,5 @@ const NotebooksComponent = () => {
     </div>
   );
 };
+
+
