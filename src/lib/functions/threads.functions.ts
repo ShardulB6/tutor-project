@@ -5,7 +5,8 @@ import { createUpdateSchema, createInsertSchema } from "drizzle-zod";
 
 import { eq, and } from "drizzle-orm";
 import z from "zod";
-import { convertToModelMessages, createGateway, streamText } from 'ai';
+import { convertToModelMessages, createGateway, streamText, } from 'ai';
+import type { UIMessage } from 'ai'
 
 
 
