@@ -27,7 +27,7 @@ export function CardImage({ title, imageSrc, dateCreated, onDelete }: CardImageP
       />
       <CardHeader>
         <CardAction></CardAction>
-        <CardTitle>{title}</CardTitle>
+        <CardTitle className="truncate">{title}</CardTitle>
         <CardDescription>Created on {dateCreated}</CardDescription>
       </CardHeader>
       <CardFooter className="flex flex-col gap-2">

@@ -26,12 +26,15 @@ function RouteComponent() {
     <div className="p-4 gap-4 mx-auto">
       <div>
         <h1 className="text-2xl mx-auto font-bold">Notebooks</h1>
-        <DialogDemo onCreate=
-        {async ({ title }) => {
-          await createNotebook({ data: { title } });
-          await router.load();
-        }}
-
+        <DialogDemo 
+          onCreate={async ({ title }) => {
+            await createNotebook({
+              data: {
+                title,
+              },
+            });
+            await router.load();
+          }} 
         />
         {/* <button
           onClick={async () => {

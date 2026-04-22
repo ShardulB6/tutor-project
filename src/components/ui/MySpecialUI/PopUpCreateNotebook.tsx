@@ -12,56 +12,54 @@ import {
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import type React from "react";
 
 type PopUpCreateNotebookProps = {
   onCreate: (data: { title: string }) => void | Promise<void>;
 };
 
 export function DialogDemo({ onCreate }: PopUpCreateNotebookProps) {
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
     const formData = new FormData(event.currentTarget);
-    const title = String(formData.get("title") ?? "").trim();
+    const title = formData.get("name") as string;
 
-    if (!title) return;
+    if (title.trim() === "") {
+      await onCreate({ title: "New Notebook" });
+    }
+    else {
+      await onCreate({ title });
+    }
 
-    await onCreate({ title });
-  }
+  };
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button type="button" variant="outline">
-          Open Dialog
-        </Button>
+        <Button variant="outline">Open Dialog</Button>
       </DialogTrigger>
-
-      <DialogContent className="sm:max-w-sm">
-        <form onSubmit={handleSubmit}>
+      
+        <DialogContent className="sm:max-w-sm">
+          <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Create Notebook</DialogTitle>
             <DialogDescription>Enter a title for your new notebook.</DialogDescription>
           </DialogHeader>
-
           <FieldGroup>
             <Field>
-              <Label htmlFor="title">Title</Label>
-              <Input id="title" name="title" defaultValue="New Notebook" />
+              <Label htmlFor="name-1">Name</Label>
+              <Input id="name-1" name="name" defaultValue="New Notebook" />
             </Field>
           </FieldGroup>
-
           <DialogFooter>
             <DialogClose asChild>
-              <Button type="button" variant="outline">
-                Cancel
-              </Button>
+              <Button variant="outline">Cancel</Button>
             </DialogClose>
-
             <Button type="submit">Create Notebook</Button>
           </DialogFooter>
-        </form>
-      </DialogContent>
+          </form>
+        </DialogContent>
+      
     </Dialog>
   );
 }
