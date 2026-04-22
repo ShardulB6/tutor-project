@@ -26,30 +26,7 @@ function RouteComponent() {
     <div className="p-4 gap-4 mx-auto">
       <div>
         <h1 className="text-2xl mx-auto font-bold">Notebooks</h1>
-        <DialogDemo 
-          onCreate={async ({ title }) => {
-            await createNotebook({
-              data: {
-                title,
-              },
-            });
-            await router.load();
-          }} 
-        />
-        {/* <button
-          onClick={async () => {
-            await createNotebook({
-              data: {
-                title:
-                  "New Notebook",
-              },
-            });
-            await router.load();
-          }}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer"
-        >
-          Create Notebook
-        </button> */}
+        <CreateNotebookComponent />
       </div>
       <NotebooksComponent />
     </div>
@@ -78,3 +55,21 @@ const NotebooksComponent = () => {
     </div>
   );
 };
+
+const CreateNotebookComponent = () => {
+  const createNotebook = useServerFn(createServerNotebook);
+  const router = useRouter();
+
+  return (
+    <DialogDemo 
+      onCreate={async ({ title }) => {
+        await createNotebook({
+          data: {
+            title,
+          },
+        });
+        await router.load();
+      }} 
+    />
+  );
+}
