@@ -3,10 +3,12 @@ import { ensureSession } from "../auth/auth.functions";
 import { db } from "#/db";
 import { NotebooksTable } from "#/db/schema";
 import { createUpdateSchema, createInsertSchema } from "drizzle-zod";
-import type { useRouter } from '@tanstack/react-router'
+import { useRouter } from '@tanstack/react-router'
 import { eq, and } from "drizzle-orm";
 import z from "zod";
 
+
+const router = useRouter()
 
 export const getServerNotebooks = createServerFn({ method: "GET" }).handler(async () => {
   const session = await ensureSession();
@@ -27,6 +29,7 @@ const insertNotebookSchema = createInsertSchema(NotebooksTable)
 export const createServerNotebook = createServerFn({ method: "POST" })
   .inputValidator(insertNotebookSchema)
   .handler(async ({ data }) => {
+
     const session = await ensureSession();
 
     const [notebook] = await db
@@ -37,7 +40,6 @@ export const createServerNotebook = createServerFn({ method: "POST" })
       })
       .returning();
 
-      
     return notebook;
   });
 

@@ -19,9 +19,6 @@ export const Route = createFileRoute("/_authenticated/")({
 });
 
 function RouteComponent() {
-  const router = useRouter();
-  const createNotebook = useServerFn(createServerNotebook);
-
   return (
     <div className="p-4 gap-4 mx-auto">
       <div>
@@ -50,6 +47,12 @@ const NotebooksComponent = () => {
             await deleteNotebook({ data: { id: notebook.id } });
             await router.load();
           }}
+          navigateToNotebook={async () => {
+            await router.navigate({
+              to: "/$notebookID",
+              params: { notebookID: notebook.id },
+            });
+          }}
         />
       ))}
     </div>
@@ -61,7 +64,7 @@ const CreateNotebookComponent = () => {
   const router = useRouter();
 
   return (
-    <DialogDemo 
+    <DialogDemo
       onCreate={async ({ title }) => {
         await createNotebook({
           data: {
@@ -69,7 +72,7 @@ const CreateNotebookComponent = () => {
           },
         });
         await router.load();
-      }} 
+      }}
     />
   );
-}
+};
