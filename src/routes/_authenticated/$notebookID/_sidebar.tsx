@@ -8,7 +8,10 @@ function RouteComponent() {
   const { notebookID } = Route.useParams();
   return (
     <div className="flex flex-row h-screen">
-      <div>Hello "/_authenticated/{notebookID}"!</div>
+      
+      <div className="box-border size-32 border-4 p-4 m-4 h-auto"></div>
+      <div className="box-border size-32 border-4 p-4 m-4 h-auto"></div>
+      <div className="box-border size-32 border-4 p-4 m-4 h-auto"></div>
       <div className="flex-1">
         <Outlet />
       </div>
