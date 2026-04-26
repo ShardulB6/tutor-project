@@ -5,8 +5,16 @@ import {
   getServerNotebooks,
 } from "#/lib/functions/notebooks.functions";
 import { useServerFn } from "@tanstack/react-start";
-import { CardImage } from "@/components/ui/MySpecialUI/NotebookCard";
 import { DialogDemo } from "@/components/ui/MySpecialUI/PopUpCreateNotebook";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardAction,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export const Route = createFileRoute("/_authenticated/")({
   loader: async () => {
@@ -32,28 +40,10 @@ function RouteComponent() {
 
 const NotebooksComponent = () => {
   const { notebooks } = Route.useLoaderData();
-  const router = useRouter();
-  const deleteNotebook = useServerFn(deleteServerNotebook);
-
   return (
     <div className="flex flex-row gap-4 flex-wrap mt-6 ">
       {notebooks.map((notebook) => (
-        <CardImage
-          key={notebook.id}
-          title={notebook.title}
-          imageSrc={"https://avatar.vercel.sh/shadcn1"}
-          dateCreated={notebook.createdAt ? notebook.createdAt.toLocaleDateString() : "Unknown"}
-          onDelete={async () => {
-            await deleteNotebook({ data: { id: notebook.id } });
-            await router.load();
-          }}
-          navigateToNotebook={async () => {
-            await router.navigate({
-              to: "/$notebookID",
-              params: { notebookID: notebook.id },
-            });
-          }}
-        />
+        <NotebookCard key={notebook.id} notebook={notebook} />
       ))}
     </div>
   );
@@ -76,3 +66,50 @@ const CreateNotebookComponent = () => {
     />
   );
 };
+
+export function NotebookCard({
+  notebook,
+}: {
+  notebook: Awaited<ReturnType<typeof getServerNotebooks>>[number];
+}) {
+  const router = useRouter();
+  const deleteNotebook = useServerFn(deleteServerNotebook);
+  return (
+    <Card className="relative mx-autow-full max-w-sm border-0 pt-0 shadow-none ">
+      <div className="absolute inset-0 z-30 aspect-video bg-black/35" />
+      <img
+        src={"https://avatar.vercel.sh/shadcn1"}
+        alt={notebook.title}
+        className="relative z-20 aspect-video w-full rounded-t-lg object-cover brightness-60 grayscale dark:brightness-40"
+      />
+      <CardHeader>
+        <CardAction></CardAction>
+        <CardTitle className="truncate">{notebook.title}</CardTitle>
+        <CardDescription>Created on {notebook.createdAt?.toLocaleDateString()}</CardDescription>
+      </CardHeader>
+      <CardFooter className="flex flex-col gap-2">
+        <Button
+          className="w-full"
+          onClick={() =>
+            router.navigate({
+              to: "/$notebookID",
+              params: { notebookID: notebook.id },
+            })
+          }
+        >
+          View Notebook
+        </Button>
+        <Button
+          className="w-full"
+          variant="destructive"
+          onClick={async () => {
+            await deleteNotebook({ data: { id: notebook.id } });
+            await router.load();
+          }}
+        >
+          Delete Notebook
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}
