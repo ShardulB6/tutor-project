@@ -43,16 +43,11 @@ export const createServerNotebook = createServerFn({ method: "POST" })
     return notebook;
   });
 
-const updateNotebookSchema = createUpdateSchema(NotebooksTable)
-  .pick({
-    title: true,
-  })
-  .strip();
 export const updateServerNotebook = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({
       id: z.string().brand<"NotebookId">(),
-      data: updateNotebookSchema,
+      data: insertNotebookSchema,
     }),
   )
   .handler(async ({ data }) => {

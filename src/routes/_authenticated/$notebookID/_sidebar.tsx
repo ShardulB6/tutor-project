@@ -11,7 +11,7 @@ function RouteComponent() {
       <h3>{notebookID}</h3>
       <div className="flex flex-row h-screen">
         <div className="box-border size-32 border-4 p-4 m-4 h-auto">
-
+          
         </div>
         <div className="box-border size-32 border-4 p-4 m-4 h-auto">
           
