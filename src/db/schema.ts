@@ -1,5 +1,5 @@
+import { relations, sql } from "drizzle-orm";
 import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
-import { sql } from "drizzle-orm";
 import crypto from "node:crypto";
 import * as authSchema from "./auth-schema";
 import { z } from "zod";
@@ -9,6 +9,13 @@ export type NotebookId = string & z.$brand<"NotebookId">;
 export type ThreadId = string & z.$brand<"ThreadId">;
 export type MessageId = string & z.$brand<"MessageId">;
 
+const timestamspColums = {
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .default(sql`(unixepoch())`)
+    .$onUpdate(() => sql`(unixepoch())`),
+};
+
 export const NotebooksTable = sqliteTable("notebook", {
   title: text().notNull(),
   id: text("id")
@@ -16,10 +23,7 @@ export const NotebooksTable = sqliteTable("notebook", {
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID() as NotebookId),
   userID: text("userID").references(() => authSchema.user.id),
-  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
-    .default(sql`(unixepoch())`)
-    .$onUpdate(() => sql`(unixepoch())`),
+  ...timestamspColums,
 });
 
 export const ThreadsTable = sqliteTable("threads", {
@@ -31,10 +35,7 @@ export const ThreadsTable = sqliteTable("threads", {
   notebookID: text("notebookID")
     .$type<NotebookId>()
     .references(() => NotebooksTable.id),
-  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
-    .default(sql`(unixepoch())`)
-    .$onUpdate(() => sql`(unixepoch())`),
+  ...timestamspColums,
 });
 
 export const MessagesTable = sqliteTable("messages", {
@@ -48,3 +49,26 @@ export const MessagesTable = sqliteTable("messages", {
     .$type<ThreadId>()
     .references(() => ThreadsTable.id),
 });
+
+export const notebookRelations = relations(NotebooksTable, ({ one, many }) => ({
+  user: one(authSchema.user, {
+    fields: [NotebooksTable.userID],
+    references: [authSchema.user.id],
+  }),
+  threads: many(ThreadsTable),
+}));
+
+export const threadRelations = relations(ThreadsTable, ({ one, many }) => ({
+  notebook: one(NotebooksTable, {
+    fields: [ThreadsTable.notebookID],
+    references: [NotebooksTable.id],
+  }),
+  messages: many(MessagesTable),
+}));
+
+export const messageRelations = relations(MessagesTable, ({ one }) => ({
+  thread: one(ThreadsTable, {
+    fields: [MessagesTable.threadID],
+    references: [ThreadsTable.id],
+  }),
+}));
