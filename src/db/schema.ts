@@ -10,10 +10,13 @@ export type ThreadId = string & z.$brand<"ThreadId">;
 export type MessageId = string & z.$brand<"MessageId">;
 
 const timestamspColums = {
-  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .default(sql`(unixepoch())`)
+    .notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" })
     .default(sql`(unixepoch())`)
-    .$onUpdate(() => sql`(unixepoch())`),
+    .$onUpdate(() => sql`(unixepoch())`)
+    .notNull(),
 };
 
 export const NotebooksTable = sqliteTable("notebook", {
@@ -22,7 +25,9 @@ export const NotebooksTable = sqliteTable("notebook", {
     .$type<NotebookId>()
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID() as NotebookId),
-  userID: text("userID").references(() => authSchema.user.id),
+  userID: text("userID")
+    .references(() => authSchema.user.id)
+    .notNull(),
   ...timestamspColums,
 });
 
@@ -34,7 +39,8 @@ export const ThreadsTable = sqliteTable("threads", {
     .$defaultFn(() => crypto.randomUUID() as ThreadId),
   notebookID: text("notebookID")
     .$type<NotebookId>()
-    .references(() => NotebooksTable.id),
+    .references(() => NotebooksTable.id)
+    .notNull(),
   ...timestamspColums,
 });
 
@@ -47,7 +53,8 @@ export const MessagesTable = sqliteTable("messages", {
   message: text().notNull(),
   threadID: text("threadID")
     .$type<ThreadId>()
-    .references(() => ThreadsTable.id),
+    .references(() => ThreadsTable.id)
+    .notNull(),
 });
 
 export const notebookRelations = relations(NotebooksTable, ({ one, many }) => ({
