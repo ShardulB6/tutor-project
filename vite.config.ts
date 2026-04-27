@@ -7,7 +7,12 @@ import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { cloudflare } from "@cloudflare/vite-plugin";
 
-const ignorePatterns = ["src/routeTree.gen.ts", "worker-configuration.d.ts", "drizzle/*"];
+const ignorePatterns = [
+  "src/routeTree.gen.ts",
+  "worker-configuration.d.ts",
+  "drizzle/*",
+  "src/components/ui/**",
+];
 
 const config = defineConfig({
   staged: {
