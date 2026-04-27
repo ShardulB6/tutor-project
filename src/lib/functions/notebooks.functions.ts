@@ -28,15 +28,11 @@ export const createServerNotebook = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const session = await ensureSession();
 
-    const [notebook] = await db
-      .insert(NotebooksTable)
-      .values({
-        title: data.title,
-        userID: session.user.id,
-      })
-      .returning();
-
-    return notebook;
+    await db.insert(NotebooksTable).values({
+      title: data.title,
+      userID: session.user.id,
+    });
+    return { success: true };
   });
 
 export const updateServerNotebook = createServerFn({ method: "POST" })
@@ -48,14 +44,11 @@ export const updateServerNotebook = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const session = await ensureSession();
-
-    const [notebook] = await db
+    await db
       .update(NotebooksTable)
       .set(data.data)
-      .where(and(eq(NotebooksTable.id, data.id), eq(NotebooksTable.userID, session.user.id)))
-      .returning();
-
-    return notebook;
+      .where(and(eq(NotebooksTable.id, data.id), eq(NotebooksTable.userID, session.user.id)));
+    return { success: true };
   });
 
 export const deleteServerNotebook = createServerFn({ method: "POST" })
