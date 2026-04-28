@@ -6,14 +6,24 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar"
 
-export function AppSidebar() {
+type ChatSidebarProps = {
+  threads: () => void | Promise<void>;
+}
+
+export function AppSidebar({ threads }: ChatSidebarProps) {
   return (
-    <Sidebar>
+    <Sidebar className="text-center">
+      Cats and dogs
       <SidebarHeader />
-      <SidebarContent>
+      
+      <SidebarContent >
+
         <SidebarGroup />
+
         <SidebarGroup />
-      </SidebarContent>
+
+      </SidebarContent >
+
       <SidebarFooter />
     </Sidebar>
   )
