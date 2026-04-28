@@ -5,7 +5,7 @@ import {
   getServerNotebooks,
 } from "#/lib/functions/notebooks.functions";
 import { useServerFn } from "@tanstack/react-start";
-import { DialogDemo } from "@/components/ui/MySpecialUI/PopUpCreateNotebook";
+import { DialogDemo } from "#/components/PopUpCreateNotebook";
 import { Button } from "@/components/ui/button";
 import {
   Card,

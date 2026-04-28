@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { AppSidebar } from "@/components/ui/MySpecialUI/ChatSidebar";
+import { AppSidebar } from "#/components/ChatSidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "#/components/ui/sidebar";
 import {
   createThread, 
