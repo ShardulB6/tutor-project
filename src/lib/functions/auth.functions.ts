@@ -36,6 +36,6 @@ export const ensureThread = createServerOnlyFn(async (threadID: ThreadId) => {
 export const ensureMessage = createServerOnlyFn(async (messageID: MessageId) =>{
     const session = await ensureSession
     const messageResult = await db.query.ThreadsTable.findFirst({
-        
+        where:
     })
 })
