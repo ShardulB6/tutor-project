@@ -1,11 +1,16 @@
-import {  createServerOnlyFn } from "@tanstack/react-start";
+import { createServerOnlyFn } from "@tanstack/react-start";
 import { ensureSession } from "../auth/auth.functions";
 import { db } from "#/db";
-import { NotebooksTable, ThreadsTable, type MessageId, type NotebookId, type ThreadId } from "#/db/schema";
+import {
+  MessagesTable,
+  NotebooksTable,
+  ThreadsTable,
+  type MessageId,
+  type NotebookId,
+  type ThreadId,
+} from "#/db/schema";
 
 import { and, eq } from "drizzle-orm";
-import z from "zod";
-
 
 export const ensureNotebook = createServerOnlyFn(async (notebookID: NotebookId) => {
   const session = await ensureSession();
@@ -33,9 +38,22 @@ export const ensureThread = createServerOnlyFn(async (threadID: ThreadId) => {
   return threadResult;
 });
 
-export const ensureMessage = createServerOnlyFn(async (messageID: MessageId) =>{
-    const session = await ensureSession
-    const messageResult = await db.query.ThreadsTable.findFirst({
-        where:
-    })
-})
+export const ensureMessage = createServerOnlyFn(async (messageID: MessageId) => {
+  const session = await ensureSession();
+  const messageResult = await db.query.MessagesTable.findFirst({
+    where: eq(MessagesTable.id, messageID),
+    with: {
+      thread: {
+        with: {
+          notebook: true,
+        },
+      },
+    },
+  });
+
+  if (messageResult === undefined || messageResult.thread.notebook.userID !== session.user.id) {
+    throw Error("unauthorized");
+  }
+
+  return messageResult;
+});
