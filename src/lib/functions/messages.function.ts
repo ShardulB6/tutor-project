@@ -5,4 +5,5 @@ import { NotebooksTable, ThreadsTable, type NotebookId, type ThreadId } from "#/
 
 import { and, eq } from "drizzle-orm";
 import z from "zod";
+import { ensureNotebook, ensureThread, ensureMessage } from "./auth.functions";
 
