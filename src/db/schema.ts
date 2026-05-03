@@ -55,6 +55,7 @@ export const MessagesTable = sqliteTable("messages", {
     .$type<ThreadId>()
     .references(() => ThreadsTable.id)
     .notNull(),
+  ...timestamspColums,
 });
 
 export const notebookRelations = relations(NotebooksTable, ({ one, many }) => ({
