@@ -7,40 +7,36 @@ import { and, eq } from "drizzle-orm";
 import z from "zod";
 import { ensureNotebook, ensureThread, ensureMessage } from "./auth.functions";
 import { createGateway, streamText } from "ai";
+import { create } from "node:domain";
+import { openai } from "@ai-sdk/openai";
 
 async function getAPIKey() {
-  const AI_key = env.AI_GATEWAY_API_KEY;
-  return AI_key;
+  return env.AI_GATEWAY_API_KEY;
 }
 
 export const createMessage = createServerFn({ method: "POST" })
-  .inputValidator(z.object({ message: z.string(), threadID: z.string().brand<"ThreadId">() }))
+  .inputValidator(z.object({ message: z.string(), threadID: z.string().brand<"ThreadId">(),role: z.string() }))
   .handler(async ({ data }) => {
     await ensureThread(data.threadID);
     await db.insert(MessagesTable).values({
       message: data.message,
-      roles: "user",
+      roles: data.role,
       threadID: data.threadID,
     });
 
-    // add AI response generation here
-    const API_KEY = await getAPIKey();
-
-    const gateway = createGateway({ apiKey: API_KEY });
+    const API_key = createGateway({
+      apiKey: await getAPIKey(),
+    });
 
     const { textStream } = streamText({
-      model: gateway("meta/llama-3.1-70b"),
-      prompt: "what are cats?",
+      model: openai("gpt-5.3-chat"),
+      prompt: data.message,
     });
+  
 
-    await db.insert(MessagesTable).values({
-      message: "",
-      roles: "assistant",
-      threadID: data.threadID,
-    });
-    for await (const text of textStream) {
-        
-    }
 
     return { success: true };
   });
+
+
+
