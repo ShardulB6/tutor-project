@@ -5,7 +5,7 @@ import { MessagesTable, NotebooksTable, ThreadsTable } from "#/db/schema";
 
 import { and, eq } from "drizzle-orm";
 import z from "zod";
-import { ensureNotebook, ensureThread, ensureMessage } from "./auth.functions";
+import { ensureNotebook, ensureThread, ensureMessage } from "./ensure.function";
 import { createGateway, streamText } from "ai";
 
 export const createMessage = createServerFn({ method: "POST" })

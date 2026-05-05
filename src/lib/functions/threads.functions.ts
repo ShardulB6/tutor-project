@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { ensureSession } from "../auth/auth.functions";
 import { db } from "#/db";
 import { NotebooksTable, ThreadsTable } from "#/db/schema";
-import { ensureNotebook, ensureThread } from "./auth.functions";
+import { ensureNotebook, ensureThread } from "./ensure.function";
 import { and, eq } from "drizzle-orm";
 import z from "zod";
 
