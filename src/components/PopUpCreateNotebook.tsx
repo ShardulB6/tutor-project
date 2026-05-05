@@ -26,11 +26,9 @@ export function DialogDemo({ onCreate }: PopUpCreateNotebookProps) {
 
     if (title.trim() === "") {
       await onCreate({ title: "New Notebook" });
-    }
-    else {
+    } else {
       await onCreate({ title });
     }
-
   };
 
   return (
@@ -38,9 +36,9 @@ export function DialogDemo({ onCreate }: PopUpCreateNotebookProps) {
       <DialogTrigger asChild>
         <Button variant="outline">Open Dialog</Button>
       </DialogTrigger>
-      
-        <DialogContent className="sm:max-w-sm">
-          <form onSubmit={handleSubmit}>
+
+      <DialogContent className="sm:max-w-sm">
+        <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Create Notebook</DialogTitle>
             <DialogDescription>Enter a title for your new notebook.</DialogDescription>
@@ -57,9 +55,8 @@ export function DialogDemo({ onCreate }: PopUpCreateNotebookProps) {
             </DialogClose>
             <Button type="submit">Create Notebook</Button>
           </DialogFooter>
-          </form>
-        </DialogContent>
-      
+        </form>
+      </DialogContent>
     </Dialog>
   );
 }

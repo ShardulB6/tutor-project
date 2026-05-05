@@ -1,11 +1,10 @@
-import { createServerFn, } from "@tanstack/react-start";
+import { createServerFn } from "@tanstack/react-start";
 import { ensureSession } from "../auth/auth.functions";
 import { db } from "#/db";
-import { NotebooksTable, ThreadsTable, } from "#/db/schema";
+import { NotebooksTable, ThreadsTable } from "#/db/schema";
 import { ensureNotebook, ensureThread } from "./auth.functions";
 import { and, eq } from "drizzle-orm";
 import z from "zod";
-
 
 export const createThread = createServerFn({ method: "POST" })
   .inputValidator(z.object({ title: z.string(), notebookID: z.string().brand<"NotebookId">() }))
