@@ -8,28 +8,22 @@ import z from "zod";
 import { ensureNotebook, ensureThread, ensureMessage } from "./auth.functions";
 import { createGateway, streamText } from "ai";
 
-import { openai } from "@ai-sdk/openai";
-
-async function getAPIKey() {
-  return env.AI_GATEWAY_API_KEY;
-}
-
 export const createMessage = createServerFn({ method: "POST" })
-  .inputValidator(z.object({ message: z.string(), threadID: z.string().brand<"ThreadId">(),role: z.string() }))
+  .inputValidator(z.object({ message: z.string(), threadID: z.string().brand<"ThreadId">() }))
   .handler(async ({ data }) => {
     await ensureThread(data.threadID);
     await db.insert(MessagesTable).values({
       message: data.message,
-      roles: data.role,
+      roles: "user",
       threadID: data.threadID,
     });
 
-    const API_key = createGateway({
-      apiKey: await getAPIKey(),
+    const vercelGateway = createGateway({
+      apiKey: env.AI_GATEWAY_API_KEY,
     });
 
     const { textStream } = streamText({
-      model: openai("gpt-5.3-chat"),
+      model: vercelGateway("openai/gpt-oss-120b"),
       prompt: data.message,
       onFinish: async ({ text, usage, finishReason }) => {
         await db.insert(MessagesTable).values({
@@ -40,33 +34,35 @@ export const createMessage = createServerFn({ method: "POST" })
       },
     });
 
-    return { success: true };
+    return textStream;
   });
 
-  export const getMessages = createServerFn({ method: "GET" })
+export const getMessages = createServerFn({ method: "GET" })
   .inputValidator(z.object({ threadID: z.string().brand<"ThreadId">() }))
   .handler(async ({ data }) => {
     await ensureThread(data.threadID);
-    const messages = await db.select().from(MessagesTable).where(eq(MessagesTable.threadID, data.threadID));
+    const messages = await db
+      .select()
+      .from(MessagesTable)
+      .where(eq(MessagesTable.threadID, data.threadID));
     return messages;
   });
 
-  export const updateMessage = createServerFn({ method: "POST" })
+export const updateMessage = createServerFn({ method: "POST" })
   .inputValidator(z.object({ messageID: z.string().brand<"MessageId">(), message: z.string() }))
   .handler(async ({ data }) => {
     await ensureMessage(data.messageID);
-    await db.update(MessagesTable).set({ message: data.message }).where(eq(MessagesTable.id, data.messageID));
+    await db
+      .update(MessagesTable)
+      .set({ message: data.message })
+      .where(eq(MessagesTable.id, data.messageID));
     return { success: true };
   });
 
-  export const deleteMessage = createServerFn({ method: "POST" })
+export const deleteMessage = createServerFn({ method: "POST" })
   .inputValidator(z.object({ messageID: z.string().brand<"MessageId">() }))
   .handler(async ({ data }) => {
     await ensureMessage(data.messageID);
     await db.delete(MessagesTable).where(eq(MessagesTable.id, data.messageID));
     return { success: true };
   });
-
-
-
-
