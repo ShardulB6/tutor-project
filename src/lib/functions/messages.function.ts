@@ -31,6 +31,12 @@ export const createMessage = createServerFn({ method: "POST" })
     const { textStream } = streamText({
       model: openai("gpt-5.3-chat"),
       prompt: data.message,
+      onFinish: async (response) => {
+        await db.insert(MessagesTable).values({
+          message: response,
+          roles: "assistant",
+          threadID: data.threadID,
+        });
     });
 
     
