@@ -31,14 +31,42 @@ export const createMessage = createServerFn({ method: "POST" })
     const { textStream } = streamText({
       model: openai("gpt-5.3-chat"),
       prompt: data.message,
-      
+      onFinish: async ({ text, usage, finishReason }) => {
+        await db.insert(MessagesTable).values({
+          message: text,
+          roles: "assistant",
+          threadID: data.threadID,
+        });
+      },
     });
-
-    
-
 
     return { success: true };
   });
+
+  export const getMessages = createServerFn({ method: "GET" })
+  .inputValidator(z.object({ threadID: z.string().brand<"ThreadId">() }))
+  .handler(async ({ data }) => {
+    await ensureThread(data.threadID);
+    const messages = await db.select().from(MessagesTable).where(eq(MessagesTable.threadID, data.threadID));
+    return messages;
+  });
+
+  export const updateMessage = createServerFn({ method: "POST" })
+  .inputValidator(z.object({ messageID: z.string().brand<"MessageId">(), message: z.string() }))
+  .handler(async ({ data }) => {
+    await ensureMessage(data.messageID);
+    await db.update(MessagesTable).set({ message: data.message }).where(eq(MessagesTable.id, data.messageID));
+    return { success: true };
+  });
+
+  export const deleteMessage = createServerFn({ method: "POST" })
+  .inputValidator(z.object({ messageID: z.string().brand<"MessageId">() }))
+  .handler(async ({ data }) => {
+    await ensureMessage(data.messageID);
+    await db.delete(MessagesTable).where(eq(MessagesTable.id, data.messageID));
+    return { success: true };
+  });
+
 
 
 
