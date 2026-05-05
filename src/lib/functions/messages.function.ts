@@ -7,7 +7,7 @@ import { and, eq } from "drizzle-orm";
 import z from "zod";
 import { ensureNotebook, ensureThread, ensureMessage } from "./auth.functions";
 import { createGateway, streamText } from "ai";
-import { create } from "node:domain";
+
 import { openai } from "@ai-sdk/openai";
 
 async function getAPIKey() {
@@ -31,7 +31,7 @@ export const createMessage = createServerFn({ method: "POST" })
     const { textStream } = streamText({
       model: openai("gpt-5.3-chat"),
       prompt: data.message,
-      onFinish: 
+      
     });
 
     

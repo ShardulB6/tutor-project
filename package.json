@@ -21,6 +21,7 @@
     "prepare": "vp config"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^3.0.60",
     "@cloudflare/vite-plugin": "^1.26.0",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-devtools": "latest",
