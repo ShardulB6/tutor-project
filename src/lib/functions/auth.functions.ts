@@ -3,7 +3,6 @@ import { ensureSession } from "../auth/auth.functions";
 import { db } from "#/db";
 import {
   MessagesTable,
-  NotebooksTable,
   ThreadsTable,
   type MessageId,
   type NotebookId,
@@ -15,7 +14,8 @@ import { and, eq } from "drizzle-orm";
 export const ensureNotebook = createServerOnlyFn(async (notebookID: NotebookId) => {
   const session = await ensureSession();
   const notebooksResult = await db.query.NotebooksTable.findFirst({
-    where: and(eq(NotebooksTable.id, notebookID), eq(NotebooksTable.userID, session.user.id)),
+    where: (NotebooksTable) =>
+      and(eq(NotebooksTable.id, notebookID), eq(NotebooksTable.userID, session.user.id)),
   });
   if (notebooksResult === undefined) {
     throw Error("unauthorized");
