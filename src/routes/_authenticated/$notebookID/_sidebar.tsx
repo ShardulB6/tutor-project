@@ -20,10 +20,13 @@ function RouteComponent() {
       <SidebarProvider>
         <AppSidebar notebookID={notebookID} threads={threads} />
         <main>
-          <SidebarTrigger />
           <SidebarInset>
-            <h3>{notebookID}</h3>
-            <Outlet />
+            <div className="absolute left-3 top-3 z-50 flex items-center gap-2">
+              <SidebarTrigger />
+            </div>
+            <div className="mt-10">
+              <Outlet />
+            </div>
           </SidebarInset>
         </main>
       </SidebarProvider>

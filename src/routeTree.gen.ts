@@ -14,7 +14,9 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AuthenticatedNotebookIDSidebarRouteImport } from './routes/_authenticated/$notebookID/_sidebar'
-import { Route as AuthenticatedNotebookIDSidebarChatIDRouteImport } from './routes/_authenticated/$notebookID/_sidebar.$chatID'
+import { Route as AuthenticatedNotebookIDSidebarPanelRouteImport } from './routes/_authenticated/$notebookID/_sidebar/_panel'
+import { Route as AuthenticatedNotebookIDSidebarPanelIndexRouteImport } from './routes/_authenticated/$notebookID/_sidebar/_panel.index'
+import { Route as AuthenticatedNotebookIDSidebarPanelChatIDRouteImport } from './routes/_authenticated/$notebookID/_sidebar/_panel.$chatID'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -41,26 +43,38 @@ const AuthenticatedNotebookIDSidebarRoute =
     path: '/$notebookID',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const AuthenticatedNotebookIDSidebarChatIDRoute =
-  AuthenticatedNotebookIDSidebarChatIDRouteImport.update({
+const AuthenticatedNotebookIDSidebarPanelRoute =
+  AuthenticatedNotebookIDSidebarPanelRouteImport.update({
+    id: '/_panel',
+    getParentRoute: () => AuthenticatedNotebookIDSidebarRoute,
+  } as any)
+const AuthenticatedNotebookIDSidebarPanelIndexRoute =
+  AuthenticatedNotebookIDSidebarPanelIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedNotebookIDSidebarPanelRoute,
+  } as any)
+const AuthenticatedNotebookIDSidebarPanelChatIDRoute =
+  AuthenticatedNotebookIDSidebarPanelChatIDRouteImport.update({
     id: '/$chatID',
     path: '/$chatID',
-    getParentRoute: () => AuthenticatedNotebookIDSidebarRoute,
+    getParentRoute: () => AuthenticatedNotebookIDSidebarPanelRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/login': typeof LoginRoute
-  '/$notebookID': typeof AuthenticatedNotebookIDSidebarRouteWithChildren
+  '/$notebookID': typeof AuthenticatedNotebookIDSidebarPanelRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/$notebookID/$chatID': typeof AuthenticatedNotebookIDSidebarChatIDRoute
+  '/$notebookID/$chatID': typeof AuthenticatedNotebookIDSidebarPanelChatIDRoute
+  '/$notebookID/': typeof AuthenticatedNotebookIDSidebarPanelIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/': typeof AuthenticatedIndexRoute
-  '/$notebookID': typeof AuthenticatedNotebookIDSidebarRouteWithChildren
+  '/$notebookID': typeof AuthenticatedNotebookIDSidebarPanelIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/$notebookID/$chatID': typeof AuthenticatedNotebookIDSidebarChatIDRoute
+  '/$notebookID/$chatID': typeof AuthenticatedNotebookIDSidebarPanelChatIDRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -69,7 +83,9 @@ export interface FileRoutesById {
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/$notebookID/_sidebar': typeof AuthenticatedNotebookIDSidebarRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/_authenticated/$notebookID/_sidebar/$chatID': typeof AuthenticatedNotebookIDSidebarChatIDRoute
+  '/_authenticated/$notebookID/_sidebar/_panel': typeof AuthenticatedNotebookIDSidebarPanelRouteWithChildren
+  '/_authenticated/$notebookID/_sidebar/_panel/$chatID': typeof AuthenticatedNotebookIDSidebarPanelChatIDRoute
+  '/_authenticated/$notebookID/_sidebar/_panel/': typeof AuthenticatedNotebookIDSidebarPanelIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -79,6 +95,7 @@ export interface FileRouteTypes {
     | '/$notebookID'
     | '/api/auth/$'
     | '/$notebookID/$chatID'
+    | '/$notebookID/'
   fileRoutesByTo: FileRoutesByTo
   to: '/login' | '/' | '/$notebookID' | '/api/auth/$' | '/$notebookID/$chatID'
   id:
@@ -88,7 +105,9 @@ export interface FileRouteTypes {
     | '/_authenticated/'
     | '/_authenticated/$notebookID/_sidebar'
     | '/api/auth/$'
-    | '/_authenticated/$notebookID/_sidebar/$chatID'
+    | '/_authenticated/$notebookID/_sidebar/_panel'
+    | '/_authenticated/$notebookID/_sidebar/_panel/$chatID'
+    | '/_authenticated/$notebookID/_sidebar/_panel/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -134,24 +153,56 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedNotebookIDSidebarRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/$notebookID/_sidebar/$chatID': {
-      id: '/_authenticated/$notebookID/_sidebar/$chatID'
+    '/_authenticated/$notebookID/_sidebar/_panel': {
+      id: '/_authenticated/$notebookID/_sidebar/_panel'
+      path: ''
+      fullPath: '/$notebookID'
+      preLoaderRoute: typeof AuthenticatedNotebookIDSidebarPanelRouteImport
+      parentRoute: typeof AuthenticatedNotebookIDSidebarRoute
+    }
+    '/_authenticated/$notebookID/_sidebar/_panel/': {
+      id: '/_authenticated/$notebookID/_sidebar/_panel/'
+      path: '/'
+      fullPath: '/$notebookID/'
+      preLoaderRoute: typeof AuthenticatedNotebookIDSidebarPanelIndexRouteImport
+      parentRoute: typeof AuthenticatedNotebookIDSidebarPanelRoute
+    }
+    '/_authenticated/$notebookID/_sidebar/_panel/$chatID': {
+      id: '/_authenticated/$notebookID/_sidebar/_panel/$chatID'
       path: '/$chatID'
       fullPath: '/$notebookID/$chatID'
-      preLoaderRoute: typeof AuthenticatedNotebookIDSidebarChatIDRouteImport
-      parentRoute: typeof AuthenticatedNotebookIDSidebarRoute
+      preLoaderRoute: typeof AuthenticatedNotebookIDSidebarPanelChatIDRouteImport
+      parentRoute: typeof AuthenticatedNotebookIDSidebarPanelRoute
     }
   }
 }
 
+interface AuthenticatedNotebookIDSidebarPanelRouteChildren {
+  AuthenticatedNotebookIDSidebarPanelChatIDRoute: typeof AuthenticatedNotebookIDSidebarPanelChatIDRoute
+  AuthenticatedNotebookIDSidebarPanelIndexRoute: typeof AuthenticatedNotebookIDSidebarPanelIndexRoute
+}
+
+const AuthenticatedNotebookIDSidebarPanelRouteChildren: AuthenticatedNotebookIDSidebarPanelRouteChildren =
+  {
+    AuthenticatedNotebookIDSidebarPanelChatIDRoute:
+      AuthenticatedNotebookIDSidebarPanelChatIDRoute,
+    AuthenticatedNotebookIDSidebarPanelIndexRoute:
+      AuthenticatedNotebookIDSidebarPanelIndexRoute,
+  }
+
+const AuthenticatedNotebookIDSidebarPanelRouteWithChildren =
+  AuthenticatedNotebookIDSidebarPanelRoute._addFileChildren(
+    AuthenticatedNotebookIDSidebarPanelRouteChildren,
+  )
+
 interface AuthenticatedNotebookIDSidebarRouteChildren {
-  AuthenticatedNotebookIDSidebarChatIDRoute: typeof AuthenticatedNotebookIDSidebarChatIDRoute
+  AuthenticatedNotebookIDSidebarPanelRoute: typeof AuthenticatedNotebookIDSidebarPanelRouteWithChildren
 }
 
 const AuthenticatedNotebookIDSidebarRouteChildren: AuthenticatedNotebookIDSidebarRouteChildren =
   {
-    AuthenticatedNotebookIDSidebarChatIDRoute:
-      AuthenticatedNotebookIDSidebarChatIDRoute,
+    AuthenticatedNotebookIDSidebarPanelRoute:
+      AuthenticatedNotebookIDSidebarPanelRouteWithChildren,
   }
 
 const AuthenticatedNotebookIDSidebarRouteWithChildren =
