@@ -28,9 +28,6 @@ function RouteComponent() {
         </main>
       </SidebarProvider>
 
-      <div></div>
-      <div></div>
-      <div></div>
     </div>
   );
 }
