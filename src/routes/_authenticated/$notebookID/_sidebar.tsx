@@ -16,15 +16,17 @@ function RouteComponent() {
   const { notebookID } = Route.useParams();
   const { threads } = Route.useLoaderData();
   return (
-    <SidebarProvider>
-      <AppSidebar notebookID={notebookID} threads={threads} />
-      <main>
-        <SidebarTrigger />
-        <SidebarInset>
-          <h3>{notebookID}</h3>
-          <Outlet />
-        </SidebarInset>
-      </main>
-    </SidebarProvider>
+    <div>
+      <SidebarProvider>
+        <AppSidebar notebookID={notebookID} threads={threads} />
+        <main>
+          <SidebarTrigger />
+          <SidebarInset>
+            <h3>{notebookID}</h3>
+            <Outlet />
+          </SidebarInset>
+        </main>
+      </SidebarProvider>
+    </div>
   );
 }
