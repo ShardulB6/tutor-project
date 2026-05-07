@@ -61,7 +61,7 @@ const CreateNotebookComponent = () => {
             title,
           },
         });
-        await router.load();
+        await router.invalidate();
       }}
     />
   );
@@ -104,7 +104,7 @@ export function NotebookCard({
           variant="destructive"
           onClick={async () => {
             await deleteNotebook({ data: { id: notebook.id } });
-            await router.load();
+            await router.invalidate();
           }}
         >
           Delete Notebook

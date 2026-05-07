@@ -34,7 +34,7 @@ export function DialogDemo({ onCreate }: PopUpCreateNotebookProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">Open Dialog</Button>
+        <Button variant="outline">Create Notebook</Button>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-sm">
