@@ -5,10 +5,10 @@ export const Route = createFileRoute("/_authenticated/$notebookID/_sidebar/_pane
 });
 
 function RouteComponent() {
-  const { notebookID, chatID } = Route.useParams();
+  const { chatID } = Route.useParams();
   return (
     <div>
-      Hello "/_authenticated/{notebookID}/_sidebar/{chatID}"!
+      {chatID}
     </div>
   );
 }

@@ -9,18 +9,20 @@ function RouteComponent() {
   return (
     <ResizablePanelGroup orientation="horizontal">
       <ResizablePanel defaultSize="20%">
-        <div className="flex h-50 items-center justify-center p-6">
-          <span className="font-semibold">One</span>
+        <div className="flex h-20 items-center justify-center p-6">
+          <span className="font-semibold">Files</span>
         </div>
       </ResizablePanel>
       <ResizableHandle />
       <ResizablePanel defaultSize="60%">
-        <Outlet />
+        <div className="flex h-30 pt-6 pl-3">
+          <Outlet />
+        </div>
       </ResizablePanel>
       <ResizableHandle />
       <ResizablePanel defaultSize="20%">
-        <div className="flex h-full items-center justify-center p-6">
-          <span className="font-semibold">Three</span>
+        <div className="flex h-20 items-center justify-center p-6">
+          <span className="font-semibold">JSON</span>
         </div>
       </ResizablePanel>
     </ResizablePanelGroup>

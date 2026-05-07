@@ -7,5 +7,5 @@ export const Route = createFileRoute(
 })
 
 function RouteComponent() {
-  return <div>Hello "/_authenticated/$notebookID/_sidebar/_panel/"!</div>
+  return <div></div>
 }
