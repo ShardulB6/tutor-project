@@ -19,15 +19,13 @@ function RouteComponent() {
     <div>
       <SidebarProvider>
         <AppSidebar notebookID={notebookID} threads={threads} />
-        <main>
+        <main className="flex-1">
           <SidebarInset>
             <div className="absolute left-3 top-3 z-50 flex items-center gap-2">
               <SidebarTrigger />
             </div>
-            <div className="mt-10">
-              <Outlet />
-            </div>
           </SidebarInset>
+          <Outlet />
         </main>
       </SidebarProvider>
     </div>
