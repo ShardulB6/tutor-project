@@ -25,7 +25,6 @@ export function AppSidebar({ notebookID, threads }: ChatSidebarProps) {
         <div>
           <h3 style={{ margin: 0 }}>{notebookID}</h3>
         </div>
-        <div className="px-2 py-1 text-sm font-semibold">Chats</div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
