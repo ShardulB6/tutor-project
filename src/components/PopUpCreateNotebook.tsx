@@ -49,7 +49,7 @@ export function DialogDemo({ onCreate }: PopUpCreateNotebookProps) {
               <Input id="name-1" name="name" defaultValue="New Notebook" />
             </Field>
           </FieldGroup>
-          <DialogFooter>
+          <DialogFooter className="pt-3">
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
