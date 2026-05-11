@@ -62,7 +62,7 @@ const PromptInputAttachmentsDisplay = () => {
 };
 
 const models = [
-  { id: "gpt-4o", name: "GPT-4o" },
+  { id: "openai/gpt-oss-120b", name: "GPT-oss" },
   { id: "claude-opus-4-20250514", name: "Claude 4 Opus" },
 ];
 
