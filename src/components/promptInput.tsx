@@ -36,13 +36,9 @@ import {
   ConversationContent,
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
-import {
-  Message,
-  MessageContent,
-  MessageResponse,
-} from "@/components/ai-elements/message";
+import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 
-export const PromptInputAttachmentsDisplay = () => {
+const PromptInputAttachmentsDisplay = () => {
   const attachments = usePromptInputAttachments();
 
   if (attachments.files.length === 0) {
@@ -70,7 +66,7 @@ const models = [
   { id: "claude-opus-4-20250514", name: "Claude 4 Opus" },
 ];
 
-const InputDemo = () => {
+export const InputDemo = () => {
   const [text, setText] = useState<string>("");
   const [model, setModel] = useState<string>(models[0].id);
   const [useWebSearch, setUseWebSearch] = useState<boolean>(false);
@@ -85,7 +81,7 @@ const InputDemo = () => {
       return;
     }
 
-    sendMessage(
+    void sendMessage(
       {
         text: message.text || "Sent with attachments",
         files: message.files,
@@ -95,26 +91,24 @@ const InputDemo = () => {
           model: model,
           webSearch: useWebSearch,
         },
-      }
+      },
     );
     setText("");
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 relative size-full rounded-lg border h-[600px]">
+    <div className="max-w-4xl mx-auto p-6 relative size-full rounded-lg border h-245">
       <div className="flex flex-col h-full">
         <Conversation>
           <ConversationContent>
-            {messages.map((message: typeof messages[0]) => (
+            {messages.map((message: (typeof messages)[0]) => (
               <Message from={message.role} key={message.id}>
                 <MessageContent>
                   {message.parts.map((part: any, i: number) => {
                     switch (part.type) {
                       case "text":
                         return (
-                          <MessageResponse key={`${message.id}-${i}`}>
-                            {part.text}
-                          </MessageResponse>
+                          <MessageResponse key={`${message.id}-${i}`}>{part.text}</MessageResponse>
                         );
                       default:
                         return null;
@@ -127,20 +121,12 @@ const InputDemo = () => {
           <ConversationScrollButton />
         </Conversation>
 
-        <PromptInput
-          onSubmit={handleSubmit}
-          className="mt-4"
-          globalDrop
-          multiple
-        >
+        <PromptInput onSubmit={handleSubmit} className="" globalDrop multiple>
           <PromptInputHeader>
             <PromptInputAttachmentsDisplay />
           </PromptInputHeader>
           <PromptInputBody>
-            <PromptInputTextarea
-              onChange={(e) => setText(e.target.value)}
-              value={text}
-            />
+            <PromptInputTextarea onChange={(e) => setText(e.target.value)} value={text} />
           </PromptInputBody>
           <PromptInputFooter>
             <PromptInputTools>
