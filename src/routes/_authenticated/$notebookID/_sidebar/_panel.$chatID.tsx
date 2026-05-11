@@ -8,7 +8,7 @@ function RouteComponent() {
   const { chatID } = Route.useParams();
   return (
     <div>
-      {chatID}
+
     </div>
   );
 }
