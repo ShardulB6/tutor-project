@@ -37,32 +37,12 @@ import {
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
 import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
+import { createMessage, getMessages, updateMessage, deleteMessage } from "@/lib/functions/messages.function";
 
-const PromptInputAttachmentsDisplay = () => {
-  const attachments = usePromptInputAttachments();
 
-  if (attachments.files.length === 0) {
-    return null;
-  }
-
-  return (
-    <Attachments variant="inline">
-      {attachments.files.map((attachment) => (
-        <Attachment
-          data={attachment}
-          key={attachment.id}
-          onRemove={() => attachments.remove(attachment.id)}
-        >
-          <AttachmentPreview />
-          <AttachmentRemove />
-        </Attachment>
-      ))}
-    </Attachments>
-  );
-};
 
 const models = [
-  { id: "openai/gpt-oss-120b", name: "GPT-oss" },
+  { id: "openai/gpt-oss-120b", name: "GPT-oss-120b" },
   { id: "claude-opus-4-20250514", name: "Claude 4 Opus" },
 ];
 
@@ -123,7 +103,6 @@ export const InputDemo = () => {
 
         <PromptInput onSubmit={handleSubmit} className="" globalDrop multiple>
           <PromptInputHeader>
-            <PromptInputAttachmentsDisplay />
           </PromptInputHeader>
           <PromptInputBody>
             <PromptInputTextarea onChange={(e) => setText(e.target.value)} value={text} />
@@ -137,14 +116,7 @@ export const InputDemo = () => {
                   <PromptInputActionAddScreenshot />
                 </PromptInputActionMenuContent>
               </PromptInputActionMenu>
-              <PromptInputButton
-                onClick={() => setUseWebSearch(!useWebSearch)}
-                tooltip={{ content: "Search the web", shortcut: "⌘K" }}
-                variant={useWebSearch ? "default" : "ghost"}
-              >
-                <GlobeIcon size={16} />
-                <span>Search</span>
-              </PromptInputButton>
+
               <PromptInputSelect
                 onValueChange={(value) => {
                   setModel(value);
