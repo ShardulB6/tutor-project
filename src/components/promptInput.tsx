@@ -39,7 +39,28 @@ import {
 import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 import { createMessage, getMessages, updateMessage, deleteMessage } from "@/lib/functions/messages.function";
 
+const PromptInputAttachmentsDisplay = () => {
+  const attachments = usePromptInputAttachments();
 
+  if (attachments.files.length === 0) {
+    return null;
+  }
+
+  return (
+    <Attachments variant="inline">
+      {attachments.files.map((attachment) => (
+        <Attachment
+          data={attachment}
+          key={attachment.id}
+          onRemove={() => attachments.remove(attachment.id)}
+        >
+          <AttachmentPreview />
+          <AttachmentRemove />
+        </Attachment>
+      ))}
+    </Attachments>
+  );
+};
 
 const models = [
   { id: "openai/gpt-oss-120b", name: "GPT-oss-120b" },
@@ -61,19 +82,7 @@ export const InputDemo = () => {
       return;
     }
 
-    void sendMessage(
-      {
-        text: message.text || "Sent with attachments",
-        files: message.files,
-      },
-      {
-        body: {
-          model: model,
-          webSearch: useWebSearch,
-        },
-      },
-    );
-    setText("");
+    
   };
 
   return (
@@ -103,6 +112,7 @@ export const InputDemo = () => {
 
         <PromptInput onSubmit={handleSubmit} className="" globalDrop multiple>
           <PromptInputHeader>
+            <PromptInputAttachmentsDisplay />
           </PromptInputHeader>
           <PromptInputBody>
             <PromptInputTextarea onChange={(e) => setText(e.target.value)} value={text} />
