@@ -16,9 +16,10 @@ import type { getThreads } from "#/lib/functions/threads.functions";
 type ChatSidebarProps = {
   notebookID: string;
   threads: Awaited<ReturnType<typeof getThreads>>;
+  onCreate: (data: { title: string; notebookID: string }) => void | Promise<void>;
 };
 
-export function AppSidebar({ notebookID, threads }: ChatSidebarProps) {
+export function AppSidebar({ notebookID, threads, onCreate }: ChatSidebarProps) {
   return (
     <Sidebar>
       <SidebarHeader>
@@ -28,6 +29,13 @@ export function AppSidebar({ notebookID, threads }: ChatSidebarProps) {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuButton onClick={() => onCreate({ title: "New Thread", notebookID })}>
+                New Thread
+              </SidebarMenuButton>
+            </SidebarMenu>
+          </SidebarGroupContent>
           <SidebarGroupLabel>Threads</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>

@@ -1,7 +1,8 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useRouter } from "@tanstack/react-router";
 import { AppSidebar } from "#/components/ChatSidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "#/components/ui/sidebar";
-import { getThreads } from "#/lib/functions/threads.functions";
+import { createThread, getThreads } from "#/lib/functions/threads.functions";
+import { useServerFn } from "@tanstack/react-start";
 
 export const Route = createFileRoute("/_authenticated/$notebookID/_sidebar")({
   loader: async ({ params }) => {
@@ -15,10 +16,19 @@ export const Route = createFileRoute("/_authenticated/$notebookID/_sidebar")({
 function RouteComponent() {
   const { notebookID } = Route.useParams();
   const { threads } = Route.useLoaderData();
+  const createNewThread = useServerFn(createThread)
+  const router = useRouter();
+
   return (
     <div>
       <SidebarProvider>
-        <AppSidebar notebookID={notebookID} threads={threads} />
+        <AppSidebar notebookID={notebookID} threads={threads} onCreate={async ({title, notebookID})=>
+        {
+          await createNewThread({
+            data:{title, notebookID},
+          });
+          await router.load();
+        }}/>
         <main className="flex-1">
           <SidebarInset>
             <div className="absolute left-3 top-3 z-50 flex items-center gap-2">
