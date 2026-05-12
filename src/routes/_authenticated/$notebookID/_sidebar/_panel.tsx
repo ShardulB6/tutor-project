@@ -17,7 +17,7 @@ function RouteComponent() {
       <ResizableHandle />
       <ResizablePanel defaultSize="60%">
         <div className="flex h-30 px-3 py-6">
-          {/* <InputDemo /> */}
+          <InputDemo /> 
           <Outlet />
         </div>
       </ResizablePanel>

@@ -67,7 +67,11 @@ const models = [
   { id: "claude-opus-4-20250514", name: "Claude 4 Opus" },
 ];
 
-export const InputDemo = () => {
+type PromptInputDemoProps = {
+  chatID?: string;
+};
+
+export const InputDemo = ({ chatID }: PromptInputDemoProps) => {
   const [text, setText] = useState<string>("");
   const [model, setModel] = useState<string>(models[0].id);
   const [useWebSearch, setUseWebSearch] = useState<boolean>(false);
@@ -82,11 +86,11 @@ export const InputDemo = () => {
       return;
     }
 
-    
+
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 relative size-full rounded-lg border h-245">
+    <div className="max-w mx-auto p-6 relative size-full rounded-lg border h-245">
       <div className="flex flex-col h-full">
         <Conversation>
           <ConversationContent>
