@@ -38,6 +38,8 @@ import {
 } from "@/components/ai-elements/conversation";
 import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 import { createMessage, getMessages, updateMessage, deleteMessage } from "@/lib/functions/messages.function";
+import { createThread } from "@/lib/functions/threads.functions";
+
 
 const PromptInputAttachmentsDisplay = () => {
   const attachments = usePromptInputAttachments();
@@ -86,6 +88,7 @@ export const InputDemo = ({ chatID }: PromptInputDemoProps) => {
       return;
     }
 
+    
 
   };
 
