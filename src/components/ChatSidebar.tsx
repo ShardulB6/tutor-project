@@ -17,9 +17,10 @@ type ChatSidebarProps = {
   notebookID: string;
   threads: Awaited<ReturnType<typeof getThreads>>;
   onCreate: (data: { title: string; notebookID: string }) => void | Promise<void>;
+  onDelete: (data: { id: string }) => void | Promise<void>;
 };
 
-export function AppSidebar({ notebookID, threads, onCreate }: ChatSidebarProps) {
+export function AppSidebar({ notebookID, threads, onCreate, onDelete }: ChatSidebarProps) {
   return (
     <Sidebar>
       <SidebarHeader>
@@ -41,11 +42,22 @@ export function AppSidebar({ notebookID, threads, onCreate }: ChatSidebarProps) 
             <SidebarMenu>
               {threads.map((thread) => (
                 <SidebarMenuItem key={thread.id}>
-                  <SidebarMenuButton asChild>
-                    <Link to="/$notebookID/$chatID" params={{ notebookID, chatID: thread.id }}>
-                      {thread.title}
-                    </Link>
-                  </SidebarMenuButton>
+                  <div className="flex items-center gap-2">
+                    <SidebarMenuButton asChild className="flex-1">
+                      <Link to="/$notebookID/$chatID" params={{ notebookID, chatID: thread.id }}>
+                        {thread.title}
+                      </Link>
+                    </SidebarMenuButton>
+
+                    <button
+                      type="button"
+                      onClick={() => onDelete({ id: thread.id })}
+                      className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-destructive hover:text-destructive-foreground"
+                      aria-label={`Delete ${thread.title}`}
+                    >
+                      X
+                    </button>
+                  </div>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
