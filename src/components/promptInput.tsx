@@ -92,6 +92,8 @@ export const InputDemo = ({ chatID }: PromptInputDemoProps) => {
       return;
     }
     
+    
+
   };
 
   return (

@@ -9,7 +9,13 @@ import { ensureNotebook, ensureThread, ensureMessage } from "./ensure.function";
 import { createGateway, streamText } from "ai";
 
 export const createMessage = createServerFn({ method: "POST" })
-  .inputValidator(z.object({ message: z.string(), threadID: z.string().brand<"ThreadId">(), AIModelName: z.string() }))
+  .inputValidator(
+    z.object({
+      message: z.string(),
+      threadID: z.string().brand<"ThreadId">(),
+      AIModelName: z.string(),
+    }),
+  )
   .handler(async ({ data }) => {
     await ensureThread(data.threadID);
     await db.insert(MessagesTable).values({
