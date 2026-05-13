@@ -43,6 +43,13 @@
       "when": 1777839573679,
       "tag": "0005_glamorous_harry_osborn",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1778647772586,
+      "tag": "0006_open_victor_mancha",
+      "breakpoints": true
     }
   ]
 }

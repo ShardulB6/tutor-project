@@ -39,7 +39,7 @@ export const ThreadsTable = sqliteTable("threads", {
     .$defaultFn(() => crypto.randomUUID() as ThreadId),
   notebookID: text("notebookID")
     .$type<NotebookId>()
-    .references(() => NotebooksTable.id)
+    .references(() => NotebooksTable.id, { onDelete: "cascade" })
     .notNull(),
   ...timestamspColums,
 });
@@ -53,7 +53,7 @@ export const MessagesTable = sqliteTable("messages", {
   message: text().notNull(),
   threadID: text("threadID")
     .$type<ThreadId>()
-    .references(() => ThreadsTable.id)
+    .references(() => ThreadsTable.id, { onDelete: "cascade" })
     .notNull(),
   ...timestamspColums,
 });
