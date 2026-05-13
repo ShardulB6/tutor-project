@@ -74,7 +74,9 @@ const models = [
 ];
 
 type PromptInputDemoProps = {
+  GetMessages?: (data: { id: string }) => void | Promise<void>;
   chatID?: string;
+
 };
 
 export const InputDemo = ({ chatID }: PromptInputDemoProps) => {
