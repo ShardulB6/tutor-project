@@ -3,6 +3,7 @@ import { ensureSession } from "../auth/auth.functions";
 import { db } from "#/db";
 import { NotebooksTable } from "#/db/schema";
 import { createInsertSchema } from "drizzle-zod";
+
 import { eq, and } from "drizzle-orm";
 import z from "zod";
 
@@ -50,6 +51,8 @@ export const updateServerNotebook = createServerFn({ method: "POST" })
     return { success: true };
   });
 
+// bug - if notebook has threads, the notebook will not be deleted.
+
 export const deleteServerNotebook = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({
@@ -62,6 +65,7 @@ export const deleteServerNotebook = createServerFn({ method: "POST" })
     await db
       .delete(NotebooksTable)
       .where(and(eq(NotebooksTable.id, data.id), eq(NotebooksTable.userID, session.user.id)));
+      
 
     return { success: true };
   });
