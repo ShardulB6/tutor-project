@@ -14,7 +14,7 @@ import {
   PromptInputActionMenuContent,
   PromptInputActionMenuTrigger,
   PromptInputBody,
-  PromptInputButton,
+
   PromptInputHeader,
   type PromptInputMessage,
   PromptInputSelect,
@@ -28,7 +28,7 @@ import {
   PromptInputTools,
   usePromptInputAttachments,
 } from "@/components/ai-elements/prompt-input";
-import { GlobeIcon } from "lucide-react";
+
 import { useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import {
@@ -37,13 +37,7 @@ import {
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
 import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
-import {
-  createMessage,
-  getMessages,
-  updateMessage,
-  deleteMessage,
-} from "@/lib/functions/messages.function";
-import { createThread } from "@/lib/functions/threads.functions";
+
 
 const PromptInputAttachmentsDisplay = () => {
   const attachments = usePromptInputAttachments();
