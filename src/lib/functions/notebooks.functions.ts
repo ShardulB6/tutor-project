@@ -51,7 +51,6 @@ export const updateServerNotebook = createServerFn({ method: "POST" })
     return { success: true };
   });
 
-// bug - if notebook has threads, the notebook will not be deleted.
 
 export const deleteServerNotebook = createServerFn({ method: "POST" })
   .inputValidator(
