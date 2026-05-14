@@ -6,22 +6,34 @@ import { MessagesTable, NotebooksTable, ThreadsTable } from "#/db/schema";
 import { and, eq } from "drizzle-orm";
 import z from "zod";
 import { ensureNotebook, ensureThread, ensureMessage } from "./ensure.function";
+import { createThread } from "./threads.functions";
 import { createGateway, streamText } from "ai";
+import { Notebook } from "lucide-react";
 
 export const createMessage = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({
       message: z.string(),
-      threadID: z.string().brand<"ThreadId">(),
       AIModelName: z.string(),
+      threadID: z.string().brand<"ThreadId">().optional(),
+      NotebookID: z.string().brand<"NotebookId">(),
     }),
   )
   .handler(async ({ data }) => {
-    await ensureThread(data.threadID);
+    const threadID =
+      data.threadID ??
+      (await createThread({
+        data: {
+          notebookID: data.NotebookID,
+          title: "New thread",
+        },
+      }));
+
+    await ensureThread(threadID);
     await db.insert(MessagesTable).values({
       message: data.message,
       roles: "user",
-      threadID: data.threadID,
+      threadID,
     });
 
     const vercelGateway = createGateway({
@@ -35,13 +47,16 @@ export const createMessage = createServerFn({ method: "POST" })
         await db.insert(MessagesTable).values({
           message: text,
           roles: "assistant",
-          threadID: data.threadID,
+          threadID,
         });
       },
     });
 
     return textStream;
   });
+
+
+
 
 export const getMessages = createServerFn({ method: "GET" })
   .inputValidator(z.object({ threadID: z.string().brand<"ThreadId">() }))

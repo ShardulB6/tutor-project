@@ -10,12 +10,14 @@ export const createThread = createServerFn({ method: "POST" })
   .inputValidator(z.object({ title: z.string(), notebookID: z.string().brand<"NotebookId">() }))
   .handler(async ({ data }) => {
     await ensureNotebook(data.notebookID);
-    await db.insert(ThreadsTable).values({
+    const [thread] = await db.insert(ThreadsTable).values({
       title: data.title,
       notebookID: data.notebookID,
+    }).returning({
+      id: ThreadsTable.id,
     });
 
-    return { success: true };
+    return thread.id;
   });
 
 export const updateThread = createServerFn({ method: "POST" })
