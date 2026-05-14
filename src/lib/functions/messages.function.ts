@@ -19,8 +19,6 @@ export const createMessage = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
-
-
     await ensureThread(data.threadID);
     await db.insert(MessagesTable).values({
       message: data.message,
@@ -47,8 +45,42 @@ export const createMessage = createServerFn({ method: "POST" })
     return textStream;
   });
 
+export const createMessageWithoutThread = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      message: z.string(),
+      AIModelName: z.string(),
+      notebookID: z.string().brand<"NotebookId">(),
+    }),
+  )
+  .handler(async ({ data }) => {
+    const threadID = await createThread({
+      data: { title: "New Thread", notebookID: data.notebookID },
+    });
+    await db.insert(MessagesTable).values({
+      message: data.message,
+      roles: "user",
+      threadID,
+    });
 
+    const vercelGateway = createGateway({
+      apiKey: env.AI_GATEWAY_API_KEY,
+    });
 
+    const { textStream } = streamText({
+      model: vercelGateway(`${data.AIModelName}`),
+      prompt: data.message,
+      onFinish: async ({ text, usage, finishReason }) => {
+        await db.insert(MessagesTable).values({
+          message: text,
+          roles: "assistant",
+          threadID,
+        });
+      },
+    });
+
+    return textStream;
+  });
 
 export const getMessages = createServerFn({ method: "GET" })
   .inputValidator(z.object({ threadID: z.string().brand<"ThreadId">() }))
