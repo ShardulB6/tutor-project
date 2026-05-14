@@ -15,25 +15,17 @@ export const createMessage = createServerFn({ method: "POST" })
     z.object({
       message: z.string(),
       AIModelName: z.string(),
-      threadID: z.string().brand<"ThreadId">().optional(),
-      NotebookID: z.string().brand<"NotebookId">(),
+      threadID: z.string().brand<"ThreadId">(),
     }),
   )
   .handler(async ({ data }) => {
-    const threadID =
-      data.threadID ??
-      (await createThread({
-        data: {
-          notebookID: data.NotebookID,
-          title: "New thread",
-        },
-      }));
 
-    await ensureThread(threadID);
+
+    await ensureThread(data.threadID);
     await db.insert(MessagesTable).values({
       message: data.message,
       roles: "user",
-      threadID,
+      threadID: data.threadID,
     });
 
     const vercelGateway = createGateway({
@@ -47,7 +39,7 @@ export const createMessage = createServerFn({ method: "POST" })
         await db.insert(MessagesTable).values({
           message: text,
           roles: "assistant",
-          threadID,
+          threadID: data.threadID,
         });
       },
     });
