@@ -14,7 +14,6 @@ import {
   PromptInputActionMenuContent,
   PromptInputActionMenuTrigger,
   PromptInputBody,
-
   PromptInputHeader,
   type PromptInputMessage,
   PromptInputSelect,
@@ -37,7 +36,7 @@ import {
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
 import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
-
+import type { NotebookId, ThreadId } from "#/db/schema";
 
 const PromptInputAttachmentsDisplay = () => {
   const attachments = usePromptInputAttachments();
@@ -68,12 +67,14 @@ const models = [
 ];
 
 type PromptInputDemoProps = {
+  CreateThreadMessage: (data: { message: string; modelName: string; NotebookID: NotebookId }) => void;
+  CreateMessage: (data: {message: string; modelName: string; threadID: ThreadId}) => void;
+  notebookID: NotebookId;
   GetMessages?: (data: { id: string }) => void | Promise<void>;
-  chatID?: string;
-
+  chatID?: ThreadId;
 };
 
-export const InputDemo = ({ chatID }: PromptInputDemoProps) => {
+export const InputDemo = ({ CreateThreadMessage, CreateMessage, GetMessages, chatID, notebookID }: PromptInputDemoProps) => {
   const [text, setText] = useState<string>("");
   const [model, setModel] = useState<string>(models[0].id);
   const [useWebSearch, setUseWebSearch] = useState<boolean>(false);
@@ -86,10 +87,19 @@ export const InputDemo = ({ chatID }: PromptInputDemoProps) => {
 
     if (!(hasText || hasAttachments)) {
       return;
+    } else if (!chatID) {
+      CreateThreadMessage({
+        message: text,
+        modelName: model,
+        NotebookID: notebookID,
+      });
+    } else {
+      CreateMessage({
+        message: text,
+        modelName: model,
+        threadID: chatID,
+      });
     }
-    
-    
-
   };
 
   return (
