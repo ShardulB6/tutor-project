@@ -107,22 +107,7 @@ export const InputDemo = ({ CreateThreadMessage, CreateMessage, GetMessages, cha
       <div className="flex flex-col h-full">
         <Conversation>
           <ConversationContent>
-            {messages.map((message: (typeof messages)[0]) => (
-              <Message from={message.role} key={message.id}>
-                <MessageContent>
-                  {message.parts.map((part: any, i: number) => {
-                    switch (part.type) {
-                      case "text":
-                        return (
-                          <MessageResponse key={`${message.id}-${i}`}>{part.text}</MessageResponse>
-                        );
-                      default:
-                        return null;
-                    }
-                  })}
-                </MessageContent>
-              </Message>
-            ))}
+
           </ConversationContent>
           <ConversationScrollButton />
         </Conversation>
