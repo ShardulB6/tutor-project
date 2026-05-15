@@ -70,7 +70,7 @@ type PromptInputDemoProps = {
   CreateThreadMessage: (data: { message: string; modelName: string; NotebookID: NotebookId }) => void;
   CreateMessage: (data: {message: string; modelName: string; threadID: ThreadId}) => void;
   notebookID: NotebookId;
-  GetMessages?: (data: { id: string }) => void | Promise<void>;
+  GetMessages: (data: { id: ThreadId }) => void | Promise<void>;
   chatID?: ThreadId;
 };
 
