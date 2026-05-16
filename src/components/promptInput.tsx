@@ -14,6 +14,7 @@ import {
   PromptInputActionMenuContent,
   PromptInputActionMenuTrigger,
   PromptInputBody,
+  PromptInputButton,
   PromptInputHeader,
   type PromptInputMessage,
   PromptInputSelect,
@@ -27,16 +28,20 @@ import {
   PromptInputTools,
   usePromptInputAttachments,
 } from "@/components/ai-elements/prompt-input";
-
+import { GlobeIcon } from "lucide-react";
+import { useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import {
   Conversation,
   ConversationContent,
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
-import { Message, MessageContent } from "@/components/ai-elements/message";
-import type { NotebookId, ThreadId } from "#/db/schema";
-import { useEffect, useState } from "react";
+import {
+  Message,
+  MessageContent,
+  MessageResponse,
+} from "@/components/ai-elements/message";
+import type { ThreadId } from "#/db/schema";
 
 const PromptInputAttachmentsDisplay = () => {
   const attachments = usePromptInputAttachments();
@@ -62,85 +67,32 @@ const PromptInputAttachmentsDisplay = () => {
 };
 
 const models = [
-  { id: "openai/gpt-oss-120b", name: "GPT-oss-120b" },
+  { id: "gpt-oss-120b", name: "GPT OSS 120B" },
   { id: "claude-opus-4-20250514", name: "Claude 4 Opus" },
 ];
 
-type PromptInputDemoProps = {
-  CreateThreadMessage: (data: { message: string; AIModelName: string; notebookID: NotebookId }) => void | Promise<void>;
-  CreateMessage: (data: { message: string; AIModelName: string; threadID: ThreadId }) => void | Promise<void>;
-  notebookID: NotebookId;
-  GetMessages?: (data: { threadID: ThreadId }) => Promise<ChatMessage[]>;
-  chatID?: ThreadId;
-};
+interface PromptInputDemoProps {
+  getMessages: (data: { id: ThreadId }) => void | Promise<void>; 
+  createMessage: (data: {}) => void | Promise<void>;
+}
 
-type ChatMessage = {
-  id: string;
-  roles: string;
-  message: string;
-  threadID: ThreadId;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-export const InputDemo = ({ CreateThreadMessage, CreateMessage, GetMessages, chatID, notebookID }: PromptInputDemoProps) => {
+export const InputDemo = () => {
   const [text, setText] = useState<string>("");
   const [model, setModel] = useState<string>(models[0].id);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [useWebSearch, setUseWebSearch] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (!chatID || !GetMessages) {
-      setMessages([]);
-      return;
-    }
+  const { messages, status, sendMessage } = useChat();
 
-    let isCurrent = true;
-
-    void GetMessages({ threadID: chatID })
-      .then((nextMessages) => {
-        if (isCurrent) {
-          setMessages(nextMessages);
-        }
-      })
-      .catch(() => {
-        if (isCurrent) {
-          setMessages([]);
-        }
-      });
-
-    return () => {
-      isCurrent = false;
-    };
-  }, [GetMessages, chatID]);
-
-
-  const {status} = useChat();
-
-  const handleSubmit = async (message: PromptInputMessage) => {
+  const handleSubmit = (message: PromptInputMessage) => {
     const hasText = Boolean(message.text);
     const hasAttachments = Boolean(message.files?.length);
 
     if (!(hasText || hasAttachments)) {
       return;
-    } else if (!chatID) {
-      await CreateThreadMessage({
-        message: text,
-        AIModelName: model,
-        notebookID,
-      });
-    } else {
-      await CreateMessage({
-        message: text,
-        AIModelName: model,
-        threadID: chatID,
-      });
-
-      if (GetMessages) {
-        const nextMessages = await GetMessages({ threadID: chatID });
-        setMessages(nextMessages);
-      }
     }
+
     
+    setText("");
   };
 
   return (
@@ -149,9 +101,20 @@ export const InputDemo = ({ CreateThreadMessage, CreateMessage, GetMessages, cha
         <Conversation>
           <ConversationContent>
             {messages.map((message) => (
-              <Message key={message.id} from={message.roles === "assistant" ? "assistant" : "user"}>
+              <Message from={message.role} key={message.id}>
                 <MessageContent>
-                  <p>{message.message}</p>
+                  {message.parts.map((part, i) => {
+                    switch (part.type) {
+                      case "text":
+                        return (
+                          <MessageResponse key={`${message.id}-${i}`}>
+                            {part.text}
+                          </MessageResponse>
+                        );
+                      default:
+                        return null;
+                    }
+                  })}
                 </MessageContent>
               </Message>
             ))}
@@ -159,12 +122,20 @@ export const InputDemo = ({ CreateThreadMessage, CreateMessage, GetMessages, cha
           <ConversationScrollButton />
         </Conversation>
 
-        <PromptInput onSubmit={handleSubmit} className="" globalDrop multiple>
+        <PromptInput
+          onSubmit={handleSubmit}
+          className="mt-4"
+          globalDrop
+          multiple
+        >
           <PromptInputHeader>
             <PromptInputAttachmentsDisplay />
           </PromptInputHeader>
           <PromptInputBody>
-            <PromptInputTextarea onChange={(e) => setText(e.target.value)} value={text} />
+            <PromptInputTextarea
+              onChange={(e) => setText(e.target.value)}
+              value={text}
+            />
           </PromptInputBody>
           <PromptInputFooter>
             <PromptInputTools>
@@ -175,7 +146,14 @@ export const InputDemo = ({ CreateThreadMessage, CreateMessage, GetMessages, cha
                   <PromptInputActionAddScreenshot />
                 </PromptInputActionMenuContent>
               </PromptInputActionMenu>
-
+              <PromptInputButton
+                onClick={() => setUseWebSearch(!useWebSearch)}
+                tooltip={{ content: "Search the web", shortcut: "⌘K" }}
+                variant={useWebSearch ? "default" : "ghost"}
+              >
+                <GlobeIcon size={16} />
+                <span>Search</span>
+              </PromptInputButton>
               <PromptInputSelect
                 onValueChange={(value) => {
                   setModel(value);

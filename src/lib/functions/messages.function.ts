@@ -9,6 +9,7 @@ import { ensureNotebook, ensureThread, ensureMessage } from "./ensure.function";
 import { createThread } from "./threads.functions";
 import { createGateway, streamText } from "ai";
 import { Notebook } from "lucide-react";
+import { create } from "domain";
 
 export const createMessage = createServerFn({ method: "POST" })
   .inputValidator(
@@ -63,23 +64,15 @@ export const createMessageWithoutThread = createServerFn({ method: "POST" })
       threadID,
     });
 
-    const vercelGateway = createGateway({
-      apiKey: env.AI_GATEWAY_API_KEY,
-    });
-
-    const { textStream } = streamText({
-      model: vercelGateway(`${data.AIModelName}`),
-      prompt: data.message,
-      onFinish: async ({ text, usage, finishReason }) => {
-        await db.insert(MessagesTable).values({
-          message: text,
-          roles: "assistant",
-          threadID,
-        });
+    await createMessage({
+      data: {
+        message: data.message,
+        AIModelName: data.AIModelName,
+        threadID,
       },
     });
 
-    return textStream;
+    return threadID;
   });
 
 export const getMessages = createServerFn({ method: "GET" })
