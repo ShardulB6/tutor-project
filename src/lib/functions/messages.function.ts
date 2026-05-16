@@ -8,8 +8,7 @@ import z from "zod";
 import { ensureNotebook, ensureThread, ensureMessage } from "./ensure.function";
 import { createThread } from "./threads.functions";
 import { createGateway, streamText } from "ai";
-import { Notebook } from "lucide-react";
-import { create } from "domain";
+
 
 export const createMessage = createServerFn({ method: "POST" })
   .inputValidator(
