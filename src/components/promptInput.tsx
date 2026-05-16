@@ -28,15 +28,15 @@ import {
   usePromptInputAttachments,
 } from "@/components/ai-elements/prompt-input";
 
-import { useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import {
   Conversation,
   ConversationContent,
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
-import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
+import { Message, MessageContent } from "@/components/ai-elements/message";
 import type { NotebookId, ThreadId } from "#/db/schema";
+import { useEffect, useState } from "react";
 
 const PromptInputAttachmentsDisplay = () => {
   const attachments = usePromptInputAttachments();
@@ -67,39 +67,80 @@ const models = [
 ];
 
 type PromptInputDemoProps = {
-  CreateThreadMessage: (data: { message: string; modelName: string; NotebookID: NotebookId }) => void;
-  CreateMessage: (data: {message: string; modelName: string; threadID: ThreadId}) => void;
+  CreateThreadMessage: (data: { message: string; AIModelName: string; notebookID: NotebookId }) => void | Promise<void>;
+  CreateMessage: (data: { message: string; AIModelName: string; threadID: ThreadId }) => void | Promise<void>;
   notebookID: NotebookId;
-  GetMessages: (data: { id: ThreadId }) => void | Promise<void>;
+  GetMessages?: (data: { threadID: ThreadId }) => Promise<ChatMessage[]>;
   chatID?: ThreadId;
+};
+
+type ChatMessage = {
+  id: string;
+  roles: string;
+  message: string;
+  threadID: ThreadId;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export const InputDemo = ({ CreateThreadMessage, CreateMessage, GetMessages, chatID, notebookID }: PromptInputDemoProps) => {
   const [text, setText] = useState<string>("");
   const [model, setModel] = useState<string>(models[0].id);
-  const [useWebSearch, setUseWebSearch] = useState<boolean>(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
 
-  const { messages, status, sendMessage } = useChat();
+  useEffect(() => {
+    if (!chatID || !GetMessages) {
+      setMessages([]);
+      return;
+    }
 
-  const handleSubmit = (message: PromptInputMessage) => {
+    let isCurrent = true;
+
+    void GetMessages({ threadID: chatID })
+      .then((nextMessages) => {
+        if (isCurrent) {
+          setMessages(nextMessages);
+        }
+      })
+      .catch(() => {
+        if (isCurrent) {
+          setMessages([]);
+        }
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [GetMessages, chatID]);
+
+
+  const {status} = useChat();
+
+  const handleSubmit = async (message: PromptInputMessage) => {
     const hasText = Boolean(message.text);
     const hasAttachments = Boolean(message.files?.length);
 
     if (!(hasText || hasAttachments)) {
       return;
     } else if (!chatID) {
-      CreateThreadMessage({
+      await CreateThreadMessage({
         message: text,
-        modelName: model,
-        NotebookID: notebookID,
+        AIModelName: model,
+        notebookID,
       });
     } else {
-      CreateMessage({
+      await CreateMessage({
         message: text,
-        modelName: model,
+        AIModelName: model,
         threadID: chatID,
       });
+
+      if (GetMessages) {
+        const nextMessages = await GetMessages({ threadID: chatID });
+        setMessages(nextMessages);
+      }
     }
+    
   };
 
   return (
@@ -107,7 +148,13 @@ export const InputDemo = ({ CreateThreadMessage, CreateMessage, GetMessages, cha
       <div className="flex flex-col h-full">
         <Conversation>
           <ConversationContent>
-
+            {messages.map((message) => (
+              <Message key={message.id} from={message.roles === "assistant" ? "assistant" : "user"}>
+                <MessageContent>
+                  <p>{message.message}</p>
+                </MessageContent>
+              </Message>
+            ))}
           </ConversationContent>
           <ConversationScrollButton />
         </Conversation>
