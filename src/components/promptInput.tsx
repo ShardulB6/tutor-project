@@ -36,12 +36,8 @@ import {
   ConversationContent,
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
-import {
-  Message,
-  MessageContent,
-  MessageResponse,
-} from "@/components/ai-elements/message";
-import type { ThreadId } from "#/db/schema";
+import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
+import type { NotebookId, ThreadId } from "#/db/schema";
 
 const PromptInputAttachmentsDisplay = () => {
   const attachments = usePromptInputAttachments();
@@ -72,8 +68,21 @@ const models = [
 ];
 
 interface PromptInputDemoProps {
-  getMessages: (data: { id: ThreadId }) => void | Promise<void>; 
-  createMessage: (data: {}) => void | Promise<void>;
+  getMessages: (data: { id: ThreadId }) => void | Promise<void>;
+  
+  createMessageThread: (data: {
+    message: string;
+    AIModelName: string;
+    ThreadID: ThreadId;
+  }) => void | Promise<void>;
+
+  createMessage: (data: {
+    message: string;
+    AIModelName: string;
+    notebookID: NotebookId;
+  }) => void | Promise<void>;
+
+  
 }
 
 export const InputDemo = () => {
@@ -91,7 +100,6 @@ export const InputDemo = () => {
       return;
     }
 
-    
     setText("");
   };
 
@@ -107,9 +115,7 @@ export const InputDemo = () => {
                     switch (part.type) {
                       case "text":
                         return (
-                          <MessageResponse key={`${message.id}-${i}`}>
-                            {part.text}
-                          </MessageResponse>
+                          <MessageResponse key={`${message.id}-${i}`}>{part.text}</MessageResponse>
                         );
                       default:
                         return null;
@@ -122,20 +128,12 @@ export const InputDemo = () => {
           <ConversationScrollButton />
         </Conversation>
 
-        <PromptInput
-          onSubmit={handleSubmit}
-          className="mt-4"
-          globalDrop
-          multiple
-        >
+        <PromptInput onSubmit={handleSubmit} className="mt-4" globalDrop multiple>
           <PromptInputHeader>
             <PromptInputAttachmentsDisplay />
           </PromptInputHeader>
           <PromptInputBody>
-            <PromptInputTextarea
-              onChange={(e) => setText(e.target.value)}
-              value={text}
-            />
+            <PromptInputTextarea onChange={(e) => setText(e.target.value)} value={text} />
           </PromptInputBody>
           <PromptInputFooter>
             <PromptInputTools>
