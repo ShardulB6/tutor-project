@@ -63,13 +63,13 @@ const PromptInputAttachmentsDisplay = () => {
 };
 
 const models = [
-  { id: "gpt-oss-120b", name: "GPT OSS 120B" },
+  { id: "openai/gpt-oss-120b", name: "GPT OSS 120B" },
   { id: "claude-opus-4-20250514", name: "Claude 4 Opus" },
 ];
 
 interface PromptInputDemoProps {
-  getMessages: (data: { id: ThreadId }) => void | Promise<void>;
-  
+  getMessages: (data: { threadID: ThreadId }) => Promise<void>;
+
   createMessageThread: (data: {
     message: string;
     AIModelName: string;
@@ -82,10 +82,17 @@ interface PromptInputDemoProps {
     notebookID: NotebookId;
   }) => void | Promise<void>;
 
-  
+  threadID?: ThreadId;
+  notebookID?: NotebookId;
 }
 
-export const InputDemo = () => {
+export const InputDemo = ({
+  getMessages,
+  createMessageThread,
+  createMessage,
+  threadID,
+  notebookID,
+}: PromptInputDemoProps) => {
   const [text, setText] = useState<string>("");
   const [model, setModel] = useState<string>(models[0].id);
   const [useWebSearch, setUseWebSearch] = useState<boolean>(false);
@@ -98,6 +105,22 @@ export const InputDemo = () => {
 
     if (!(hasText || hasAttachments)) {
       return;
+    } 
+    
+    else {
+      if (!threadID) {
+        void createMessage({
+          message: message.text,
+          AIModelName: model,
+          notebookID: notebookID!,
+        });
+      } else {
+        void createMessageThread({
+          message: message.text,
+          AIModelName: model,
+          ThreadID: threadID,
+        });
+      }
     }
 
     setText("");
