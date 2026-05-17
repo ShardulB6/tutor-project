@@ -70,17 +70,22 @@ const models = [
 interface PromptInputDemoProps {
   getMessages: (data: { threadID: ThreadId }) => Promise<void>;
 
-  createMessageThread: (data: {
-    message: string;
-    AIModelName: string;
-    ThreadID: ThreadId;
-  }) => void | Promise<void>;
-
-  createMessage: (data: {
-    message: string;
-    AIModelName: string;
-    notebookID: NotebookId;
-  }) => void | Promise<void>;
+  createMessage: (
+    data:
+      | {
+          mode: "thread";
+          message: string;
+          AIModelName: string;
+          threadID: ThreadId;
+        }
+      | {
+          mode: "notebook";
+          message: string;
+          AIModelName: string;
+          notebookID: NotebookId;
+          threadTitle?: string;
+        },
+  ) => void | Promise<void>;
 
   threadID?: ThreadId;
   notebookID?: NotebookId;
@@ -88,7 +93,6 @@ interface PromptInputDemoProps {
 
 export const InputDemo = ({
   getMessages,
-  createMessageThread,
   createMessage,
   threadID,
   notebookID,
@@ -105,22 +109,23 @@ export const InputDemo = ({
 
     if (!(hasText || hasAttachments)) {
       return;
-    } 
-    
-    else {
-      if (!threadID) {
-        void createMessage({
-          message: message.text,
-          AIModelName: model,
-          notebookID: notebookID!,
-        });
-      } else {
-        void createMessageThread({
-          message: message.text,
-          AIModelName: model,
-          ThreadID: threadID,
-        });
-      }
+    }
+
+    if (threadID) {
+      void createMessage({
+        mode: "thread",
+        message: message.text,
+        AIModelName: model,
+        threadID,
+      });
+    } else if (notebookID) {
+      void createMessage({
+        mode: "notebook",
+        message: message.text,
+        AIModelName: model,
+        notebookID,
+        threadTitle: "New Thread",
+      });
     }
 
     setText("");
