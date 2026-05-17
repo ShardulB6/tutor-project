@@ -70,18 +70,19 @@ const models = [
 interface PromptInputDemoProps {
   getMessages: (data: { threadID: ThreadId }) => Promise<void>;
 
-  createMessage: (data: {
-    message: string;
-    AIModelName: string;
-    id: NotebookId | ThreadId;
-  }) => void | Promise<void>;
+  createMessage: (
+    data: {
+      message: string;
+      AIModelName: string;
+    } & ({ threadID: ThreadId } | { notebookID: NotebookId }),
+  ) => void | Promise<void>;
 
   threadID?: ThreadId;
   notebookID?: NotebookId;
 }
 
 export const InputDemo = ({
-  getMessages,
+  getMessages: _getMessages,
   createMessage,
   threadID,
   notebookID,
@@ -90,7 +91,7 @@ export const InputDemo = ({
   const [model, setModel] = useState<string>(models[0].id);
   const [useWebSearch, setUseWebSearch] = useState<boolean>(false);
 
-  const { messages, status, sendMessage } = useChat();
+  const { messages, status } = useChat();
 
   const handleSubmit = (message: PromptInputMessage) => {
     const hasText = Boolean(message.text);
@@ -99,17 +100,17 @@ export const InputDemo = ({
     if (!(hasText || hasAttachments)) {
       return;
     } else {
-      if (!threadID) {
+      if (threadID) {
         void createMessage({
           message: message.text,
           AIModelName: model,
-          id: notebookID!,
+          threadID,
         });
       } else {
         void createMessage({
           message: message.text,
           AIModelName: model,
-          id: threadID,
+          notebookID: notebookID!,
         });
       }
     }
