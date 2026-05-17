@@ -1,48 +1,29 @@
-import { createServerFn } from "@tanstack/react-start";
+import { createServerFn, createServerOnlyFn } from "@tanstack/react-start";
 import { env } from "../env";
 import { db } from "#/db";
-import { MessagesTable } from "#/db/schema";
+import { MessagesTable, NotebooksTable, ThreadsTable } from "#/db/schema";
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import z from "zod";
-import { ensureThread, ensureMessage } from "./ensure.function";
+import { ensureNotebook, ensureThread, ensureMessage } from "./ensure.function";
 import { createThread } from "./threads.functions";
 import { createGateway, streamText } from "ai";
 
-const createMessageInput = z.discriminatedUnion("mode", [
-  z.object({
-    mode: z.literal("thread"),
-    message: z.string(),
-    AIModelName: z.string(),
-    threadID: z.string().brand<"ThreadId">(),
-  }),
-  z.object({
-    mode: z.literal("notebook"),
-    message: z.string(),
-    AIModelName: z.string(),
-    notebookID: z.string().brand<"NotebookId">(),
-    threadTitle: z.string().optional(),
-  }),
-]);
 
 export const createMessage = createServerFn({ method: "POST" })
-  .inputValidator(createMessageInput)
+  .inputValidator(
+    z.object({
+      message: z.string(),
+      AIModelName: z.string(),
+      threadID: z.string().brand<"ThreadId">(),
+    }),
+  )
   .handler(async ({ data }) => {
-    const threadID =
-      data.mode === "thread"
-        ? data.threadID
-        : await createThread({
-            data: {
-              title: data.threadTitle ?? "New Thread",
-              notebookID: data.notebookID,
-            },
-          });
-
-    await ensureThread(threadID);
+    await ensureThread(data.threadID);
     await db.insert(MessagesTable).values({
       message: data.message,
       roles: "user",
-      threadID,
+      threadID: data.threadID,
     });
 
     const vercelGateway = createGateway({
@@ -52,11 +33,11 @@ export const createMessage = createServerFn({ method: "POST" })
     const { textStream } = streamText({
       model: vercelGateway(`${data.AIModelName}`),
       prompt: data.message,
-      onFinish: async ({ text }) => {
+      onFinish: async ({ text, usage, finishReason }) => {
         await db.insert(MessagesTable).values({
           message: text,
           roles: "assistant",
-          threadID,
+          threadID: data.threadID,
         });
       },
     });
@@ -64,7 +45,6 @@ export const createMessage = createServerFn({ method: "POST" })
     return textStream;
   });
 
-<<<<<<< HEAD
 export const createMessageWithoutThread = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({
@@ -80,22 +60,20 @@ export const createMessageWithoutThread = createServerFn({ method: "POST" })
     await db.insert(MessagesTable).values({
       message: data.message,
       roles: "user",
-      threadID: threadID,
+      threadID,
     });
 
     await createMessage({
       data: {
         message: data.message,
         AIModelName: data.AIModelName,
-        threadID: threadID,
+        threadID,
       },
     });
 
     return threadID;
   });
 
-=======
->>>>>>> 16961773196b8bd83242eba0946924a831f1113a
 export const getMessages = createServerFn({ method: "GET" })
   .inputValidator(z.object({ threadID: z.string().brand<"ThreadId">() }))
   .handler(async ({ data }) => {
