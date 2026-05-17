@@ -10,20 +10,35 @@ import { createThread } from "./threads.functions";
 import { createGateway, streamText } from "ai";
 
 
-export const createMessage = createServerFn({ method: "POST" })
+  export const createMessage = createServerFn({ method: "POST" })
   .inputValidator(
-    z.object({
-      message: z.string(),
-      AIModelName: z.string(),
-      threadID: z.string().brand<"ThreadId">(),
-    }),
+    z.union([
+      z.object({
+        message: z.string(),
+        AIModelName: z.string(),
+        threadID: z.string().brand<"ThreadId">(),
+      }),
+      z.object({
+        message: z.string(),
+        AIModelName: z.string(),
+        notebookID: z.string().brand<"NotebookId">(),
+      }),
+    ]),
   )
   .handler(async ({ data }) => {
-    await ensureThread(data.threadID);
+    const threadID =
+      "threadID" in data
+        ? data.threadID
+        : await createThread({
+            data: { title: "New Thread", notebookID: data.notebookID },
+          });
+
+    await ensureThread(threadID);
+
     await db.insert(MessagesTable).values({
       message: data.message,
       roles: "user",
-      threadID: data.threadID,
+      threadID,
     });
 
     const vercelGateway = createGateway({
@@ -31,13 +46,13 @@ export const createMessage = createServerFn({ method: "POST" })
     });
 
     const { textStream } = streamText({
-      model: vercelGateway(`${data.AIModelName}`),
+      model: vercelGateway(data.AIModelName),
       prompt: data.message,
-      onFinish: async ({ text, usage, finishReason }) => {
+      onFinish: async ({ text }) => {
         await db.insert(MessagesTable).values({
           message: text,
           roles: "assistant",
-          threadID: data.threadID,
+          threadID,
         });
       },
     });
@@ -45,34 +60,7 @@ export const createMessage = createServerFn({ method: "POST" })
     return textStream;
   });
 
-export const createMessageWithoutThread = createServerFn({ method: "POST" })
-  .inputValidator(
-    z.object({
-      message: z.string(),
-      AIModelName: z.string(),
-      notebookID: z.string().brand<"NotebookId">(),
-    }),
-  )
-  .handler(async ({ data }) => {
-    const threadID = await createThread({
-      data: { title: "New Thread", notebookID: data.notebookID },
-    });
-    await db.insert(MessagesTable).values({
-      message: data.message,
-      roles: "user",
-      threadID,
-    });
 
-    await createMessage({
-      data: {
-        message: data.message,
-        AIModelName: data.AIModelName,
-        threadID,
-      },
-    });
-
-    return threadID;
-  });
 
 export const getMessages = createServerFn({ method: "GET" })
   .inputValidator(z.object({ threadID: z.string().brand<"ThreadId">() }))
