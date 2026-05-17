@@ -60,14 +60,14 @@ export const createMessageWithoutThread = createServerFn({ method: "POST" })
     await db.insert(MessagesTable).values({
       message: data.message,
       roles: "user",
-      threadID,
+      threadID: threadID,
     });
 
     await createMessage({
       data: {
         message: data.message,
         AIModelName: data.AIModelName,
-        threadID,
+        threadID: threadID,
       },
     });
 
