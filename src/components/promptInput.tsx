@@ -70,16 +70,10 @@ const models = [
 interface PromptInputDemoProps {
   getMessages: (data: { threadID: ThreadId }) => Promise<void>;
 
-  createMessageThread: (data: {
-    message: string;
-    AIModelName: string;
-    ThreadID: ThreadId;
-  }) => void | Promise<void>;
-
   createMessage: (data: {
     message: string;
     AIModelName: string;
-    notebookID: NotebookId;
+    id: NotebookId | ThreadId;
   }) => void | Promise<void>;
 
   threadID?: ThreadId;
@@ -88,7 +82,6 @@ interface PromptInputDemoProps {
 
 export const InputDemo = ({
   getMessages,
-  createMessageThread,
   createMessage,
   threadID,
   notebookID,
@@ -105,20 +98,18 @@ export const InputDemo = ({
 
     if (!(hasText || hasAttachments)) {
       return;
-    } 
-    
-    else {
+    } else {
       if (!threadID) {
         void createMessage({
           message: message.text,
           AIModelName: model,
-          notebookID: notebookID!,
+          id: notebookID!,
         });
       } else {
-        void createMessageThread({
+        void createMessage({
           message: message.text,
           AIModelName: model,
-          ThreadID: threadID,
+          id: threadID,
         });
       }
     }
