@@ -82,7 +82,7 @@ interface PromptInputDemoProps {
 }
 
 export const InputDemo = ({
-  getMessages: _getMessages,
+  getMessages,
   createMessage,
   threadID,
   notebookID,
