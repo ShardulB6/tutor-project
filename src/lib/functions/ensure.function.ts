@@ -2,11 +2,7 @@ import { createServerOnlyFn } from "@tanstack/react-start";
 import { ensureSession } from "../auth/auth.functions";
 import { db } from "#/db";
 import {
-  MessagesTable,
-  ThreadsTable,
-  type MessageId,
   type NotebookId,
-  type ThreadId,
 } from "#/db/schema";
 
 import { and, eq } from "drizzle-orm";
