@@ -12,6 +12,7 @@ const ignorePatterns = [
   "worker-configuration.d.ts",
   "drizzle/*",
   "src/components/ui/**",
+  "src/components/ai-elements/**",
 ];
 
 const config = defineConfig({

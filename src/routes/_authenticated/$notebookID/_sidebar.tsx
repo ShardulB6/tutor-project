@@ -1,13 +1,21 @@
-import { createFileRoute, Outlet, useRouter } from "@tanstack/react-router";
-import { AppSidebar } from "#/components/ChatSidebar";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "#/components/ui/sidebar";
-import { createThread, getThreads, deleteThread } from "#/lib/functions/threads.functions";
-import { useServerFn } from "@tanstack/react-start";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
 
 export const Route = createFileRoute("/_authenticated/$notebookID/_sidebar")({
   loader: async ({ params }) => {
-    const threads = await getThreads({ data: { notebookID: params.notebookID } });
-    return { threads };
+    return { threads: [] };
   },
 
   component: RouteComponent,
@@ -15,52 +23,11 @@ export const Route = createFileRoute("/_authenticated/$notebookID/_sidebar")({
 
 function RouteComponent() {
   const { notebookID } = Route.useParams();
-  const { threads } = Route.useLoaderData();
-  const createNewThread = useServerFn(createThread);
-  const deleteThreads = useServerFn(deleteThread)
-  const router = useRouter();
-
-  type CreateThreadInput = {
-    title: string;
-    notebookID: string;
-  };
-
-  type DeleteThreadInput = {
-    id: string;
-  }
-
-  const handleCreateThread = async ({
-    title,
-    notebookID,
-  }: CreateThreadInput): Promise<void> => {
-    await createNewThread({
-      data: {
-        title,
-        notebookID,
-      },
-    });
-
-    await router.load();
-  };
-  
-  const handleDeleteThread = async ({ id }: DeleteThreadInput): Promise<void> => {
-    await deleteThreads({
-      data: { id },
-    });
-
-    await router.load();
-  };
-  
 
   return (
     <div>
       <SidebarProvider>
-        <AppSidebar
-          notebookID={notebookID}
-          threads={threads}
-          onCreate={handleCreateThread}
-          onDelete={handleDeleteThread}
-        />
+        <AppSidebar notebookID={notebookID} />
         <main className="flex-1">
           <SidebarInset>
             <div className="absolute left-3 top-3 z-50 flex items-center gap-2">
@@ -71,5 +38,34 @@ function RouteComponent() {
         </main>
       </SidebarProvider>
     </div>
+  );
+}
+
+type ChatSidebarProps = {
+  notebookID: string;
+};
+
+export function AppSidebar({ notebookID }: ChatSidebarProps) {
+  const { threads } = Route.useLoaderData();
+  return (
+    <Sidebar>
+      <SidebarHeader>
+        <div>
+          <h3 style={{ margin: 0 }}>{notebookID}</h3>
+        </div>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuButton>New Thread</SidebarMenuButton>
+            </SidebarMenu>
+          </SidebarGroupContent>
+          <SidebarGroupLabel>Threads</SidebarGroupLabel>
+        </SidebarGroup>
+      </SidebarContent>
+
+      <SidebarFooter />
+    </Sidebar>
   );
 }
