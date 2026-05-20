@@ -39,7 +39,9 @@ export const notebookRelations = relations(NotebooksTable, ({ one }) => ({
 export const SessionMessagesTable = sqliteTable(
   "assistant_messages",
   {
-    tenantID: text("tenant_id").notNull(),
+    notebookID: text("notebook_id")
+      .references(() => NotebooksTable.id, { onDelete: "cascade" })
+      .notNull(),
     sessionID: text("session_id").notNull(),
     id: text("id").notNull(),
     parentID: text("parent_id"),
@@ -55,14 +57,14 @@ export const SessionMessagesTable = sqliteTable(
       .notNull(),
   },
   (table) => [
-    primaryKey({ columns: [table.tenantID, table.sessionID, table.id] }),
-    index("assistant_messages_tenant_session_parent_idx").on(
-      table.tenantID,
+    primaryKey({ columns: [table.notebookID, table.sessionID, table.id] }),
+    index("assistant_messages_notebook_session_parent_idx").on(
+      table.notebookID,
       table.sessionID,
       table.parentID,
     ),
-    index("assistant_messages_tenant_session_created_idx").on(
-      table.tenantID,
+    index("assistant_messages_notebook_session_created_idx").on(
+      table.notebookID,
       table.sessionID,
       table.createdAt,
     ),
@@ -72,7 +74,9 @@ export const SessionMessagesTable = sqliteTable(
 export const SessionCompactionsTable = sqliteTable(
   "assistant_compactions",
   {
-    tenantID: text("tenant_id").notNull(),
+    notebookID: text("notebook_id")
+      .references(() => NotebooksTable.id, { onDelete: "cascade" })
+      .notNull(),
     sessionID: text("session_id").notNull(),
     id: text("id").notNull(),
     summary: text("summary").notNull(),
@@ -87,9 +91,9 @@ export const SessionCompactionsTable = sqliteTable(
       .notNull(),
   },
   (table) => [
-    primaryKey({ columns: [table.tenantID, table.sessionID, table.id] }),
-    index("assistant_compactions_tenant_session_from_idx").on(
-      table.tenantID,
+    primaryKey({ columns: [table.notebookID, table.sessionID, table.id] }),
+    index("assistant_compactions_notebook_session_from_idx").on(
+      table.notebookID,
       table.sessionID,
       table.fromMessageID,
     ),
@@ -99,7 +103,9 @@ export const SessionCompactionsTable = sqliteTable(
 export const SessionContextBlocksTable = sqliteTable(
   "assistant_context_blocks",
   {
-    tenantID: text("tenant_id").notNull(),
+    notebookID: text("notebook_id")
+      .references(() => NotebooksTable.id, { onDelete: "cascade" })
+      .notNull(),
     sessionID: text("session_id").notNull(),
     label: text("label").notNull(),
     content: text("content").notNull(),
@@ -108,13 +114,15 @@ export const SessionContextBlocksTable = sqliteTable(
       .$onUpdate(() => new Date())
       .notNull(),
   },
-  (table) => [primaryKey({ columns: [table.tenantID, table.sessionID, table.label] })],
+  (table) => [primaryKey({ columns: [table.notebookID, table.sessionID, table.label] })],
 );
 
 export const SessionSearchEntriesTable = sqliteTable(
   "assistant_search_entries",
   {
-    tenantID: text("tenant_id").notNull(),
+    notebookID: text("notebook_id")
+      .references(() => NotebooksTable.id, { onDelete: "cascade" })
+      .notNull(),
     sessionID: text("session_id").notNull(),
     label: text("label").notNull(),
     key: text("key").notNull(),
@@ -125,9 +133,9 @@ export const SessionSearchEntriesTable = sqliteTable(
       .notNull(),
   },
   (table) => [
-    primaryKey({ columns: [table.tenantID, table.sessionID, table.label, table.key] }),
-    index("assistant_search_entries_tenant_session_label_idx").on(
-      table.tenantID,
+    primaryKey({ columns: [table.notebookID, table.sessionID, table.label, table.key] }),
+    index("assistant_search_entries_notebook_session_label_idx").on(
+      table.notebookID,
       table.sessionID,
       table.label,
     ),

@@ -7,6 +7,7 @@ import type {
   StoredCompaction,
 } from "agents/experimental/memory/session";
 import { SessionCompactionsTable, SessionMessagesTable } from "#/db/schema";
+import type { NotebookId } from "#/db/schema";
 import type { db } from "#/db";
 
 export type Database = typeof db;
@@ -21,16 +22,16 @@ export class D1SessionProvider implements SessionProvider {
 
   private constructor(
     private readonly database: Database,
-    private readonly tenantId: string,
+    private readonly notebookId: NotebookId,
     private readonly sessionId: string,
   ) {}
 
   static async create(
     database: Database,
-    tenantId: string,
+    notebookId: NotebookId,
     sessionId: string,
   ): Promise<D1SessionProvider> {
-    const provider = new D1SessionProvider(database, tenantId, sessionId);
+    const provider = new D1SessionProvider(database, notebookId, sessionId);
     await provider.hydrate();
     return provider;
   }
@@ -104,7 +105,7 @@ export class D1SessionProvider implements SessionProvider {
 
     const now = new Date();
     const row: SessionMessageRow = {
-      tenantID: this.tenantId,
+      notebookID: this.notebookId,
       sessionID: this.sessionId,
       id: message.id,
       parentID: parent,
@@ -149,7 +150,7 @@ export class D1SessionProvider implements SessionProvider {
         })
         .where(
           and(
-            eq(SessionMessagesTable.tenantID, this.tenantId),
+            eq(SessionMessagesTable.notebookID, this.notebookId),
             eq(SessionMessagesTable.sessionID, this.sessionId),
             eq(SessionMessagesTable.id, row.id),
           ),
@@ -166,7 +167,7 @@ export class D1SessionProvider implements SessionProvider {
           .delete(SessionMessagesTable)
           .where(
             and(
-              eq(SessionMessagesTable.tenantID, this.tenantId),
+              eq(SessionMessagesTable.notebookID, this.notebookId),
               eq(SessionMessagesTable.sessionID, this.sessionId),
               eq(SessionMessagesTable.id, id),
             ),
@@ -184,7 +185,7 @@ export class D1SessionProvider implements SessionProvider {
         .delete(SessionMessagesTable)
         .where(
           and(
-            eq(SessionMessagesTable.tenantID, this.tenantId),
+            eq(SessionMessagesTable.notebookID, this.notebookId),
             eq(SessionMessagesTable.sessionID, this.sessionId),
           ),
         )
@@ -195,7 +196,7 @@ export class D1SessionProvider implements SessionProvider {
         .delete(SessionCompactionsTable)
         .where(
           and(
-            eq(SessionCompactionsTable.tenantID, this.tenantId),
+            eq(SessionCompactionsTable.notebookID, this.notebookId),
             eq(SessionCompactionsTable.sessionID, this.sessionId),
           ),
         )
@@ -208,7 +209,7 @@ export class D1SessionProvider implements SessionProvider {
     const now = new Date();
 
     const row: CompactionRow = {
-      tenantID: this.tenantId,
+      notebookID: this.notebookId,
       sessionID: this.sessionId,
       id,
       summary,
@@ -275,7 +276,7 @@ export class D1SessionProvider implements SessionProvider {
         .from(SessionMessagesTable)
         .where(
           and(
-            eq(SessionMessagesTable.tenantID, this.tenantId),
+            eq(SessionMessagesTable.notebookID, this.notebookId),
             eq(SessionMessagesTable.sessionID, this.sessionId),
           ),
         ),
@@ -284,7 +285,7 @@ export class D1SessionProvider implements SessionProvider {
         .from(SessionCompactionsTable)
         .where(
           and(
-            eq(SessionCompactionsTable.tenantID, this.tenantId),
+            eq(SessionCompactionsTable.notebookID, this.notebookId),
             eq(SessionCompactionsTable.sessionID, this.sessionId),
           ),
         ),

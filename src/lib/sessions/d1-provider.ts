@@ -11,6 +11,7 @@ import {
   SessionMessagesTable,
   SessionSearchEntriesTable,
 } from "#/db/schema";
+import type { NotebookId } from "#/db/schema";
 import type { db } from "#/db";
 
 export type Database = typeof db;
@@ -20,7 +21,7 @@ type SessionMessageRow = typeof SessionMessagesTable.$inferSelect;
 export class D1SessionProvider {
   constructor(
     private readonly database: Database,
-    private readonly tenantId: string,
+    private readonly notebookId: NotebookId,
     private readonly sessionId: string,
   ) {}
 
@@ -62,7 +63,7 @@ export class D1SessionProvider {
       .from(SessionMessagesTable)
       .where(
         and(
-          eq(SessionMessagesTable.tenantID, this.tenantId),
+          eq(SessionMessagesTable.notebookID, this.notebookId),
           eq(SessionMessagesTable.sessionID, this.sessionId),
           eq(SessionMessagesTable.parentID, messageId),
         ),
@@ -106,7 +107,7 @@ export class D1SessionProvider {
     await this.database
       .insert(SessionMessagesTable)
       .values({
-        tenantID: this.tenantId,
+        notebookID: this.notebookId,
         sessionID: this.sessionId,
         id: message.id,
         parentID: parent,
@@ -130,7 +131,7 @@ export class D1SessionProvider {
       })
       .where(
         and(
-          eq(SessionMessagesTable.tenantID, this.tenantId),
+          eq(SessionMessagesTable.notebookID, this.notebookId),
           eq(SessionMessagesTable.sessionID, this.sessionId),
           eq(SessionMessagesTable.id, message.id),
         ),
@@ -143,7 +144,7 @@ export class D1SessionProvider {
         .delete(SessionMessagesTable)
         .where(
           and(
-            eq(SessionMessagesTable.tenantID, this.tenantId),
+            eq(SessionMessagesTable.notebookID, this.notebookId),
             eq(SessionMessagesTable.sessionID, this.sessionId),
             eq(SessionMessagesTable.id, id),
           ),
@@ -156,7 +157,7 @@ export class D1SessionProvider {
       .delete(SessionMessagesTable)
       .where(
         and(
-          eq(SessionMessagesTable.tenantID, this.tenantId),
+          eq(SessionMessagesTable.notebookID, this.notebookId),
           eq(SessionMessagesTable.sessionID, this.sessionId),
         ),
       );
@@ -165,7 +166,7 @@ export class D1SessionProvider {
       .delete(SessionCompactionsTable)
       .where(
         and(
-          eq(SessionCompactionsTable.tenantID, this.tenantId),
+          eq(SessionCompactionsTable.notebookID, this.notebookId),
           eq(SessionCompactionsTable.sessionID, this.sessionId),
         ),
       );
@@ -180,7 +181,7 @@ export class D1SessionProvider {
     const now = new Date();
 
     await this.database.insert(SessionCompactionsTable).values({
-      tenantID: this.tenantId,
+      notebookID: this.notebookId,
       sessionID: this.sessionId,
       id,
       summary,
@@ -205,7 +206,7 @@ export class D1SessionProvider {
       .from(SessionCompactionsTable)
       .where(
         and(
-          eq(SessionCompactionsTable.tenantID, this.tenantId),
+          eq(SessionCompactionsTable.notebookID, this.notebookId),
           eq(SessionCompactionsTable.sessionID, this.sessionId),
         ),
       )
@@ -238,7 +239,7 @@ export class D1SessionProvider {
       .from(SessionMessagesTable)
       .where(
         and(
-          eq(SessionMessagesTable.tenantID, this.tenantId),
+          eq(SessionMessagesTable.notebookID, this.notebookId),
           eq(SessionMessagesTable.sessionID, this.sessionId),
           ...terms.map((term) => like(SessionMessagesTable.textContent, `%${term}%`)),
         ),
@@ -260,7 +261,7 @@ export class D1SessionProvider {
       .from(SessionMessagesTable)
       .where(
         and(
-          eq(SessionMessagesTable.tenantID, this.tenantId),
+          eq(SessionMessagesTable.notebookID, this.notebookId),
           eq(SessionMessagesTable.sessionID, this.sessionId),
           eq(SessionMessagesTable.id, id),
         ),
@@ -276,7 +277,7 @@ export class D1SessionProvider {
       .from(SessionMessagesTable)
       .where(
         and(
-          eq(SessionMessagesTable.tenantID, this.tenantId),
+          eq(SessionMessagesTable.notebookID, this.notebookId),
           eq(SessionMessagesTable.sessionID, this.sessionId),
         ),
       )
@@ -353,7 +354,7 @@ export class D1SessionProvider {
 export class D1ContextProvider {
   constructor(
     private readonly database: Database,
-    private readonly tenantId: string,
+    private readonly notebookId: NotebookId,
     private readonly sessionId: string,
     private label = "",
   ) {}
@@ -370,7 +371,7 @@ export class D1ContextProvider {
       .from(SessionContextBlocksTable)
       .where(
         and(
-          eq(SessionContextBlocksTable.tenantID, this.tenantId),
+          eq(SessionContextBlocksTable.notebookID, this.notebookId),
           eq(SessionContextBlocksTable.sessionID, this.sessionId),
           eq(SessionContextBlocksTable.label, this.label),
         ),
@@ -386,7 +387,7 @@ export class D1ContextProvider {
     await this.database
       .insert(SessionContextBlocksTable)
       .values({
-        tenantID: this.tenantId,
+        notebookID: this.notebookId,
         sessionID: this.sessionId,
         label: this.label,
         content,
@@ -394,7 +395,7 @@ export class D1ContextProvider {
       })
       .onConflictDoUpdate({
         target: [
-          SessionContextBlocksTable.tenantID,
+          SessionContextBlocksTable.notebookID,
           SessionContextBlocksTable.sessionID,
           SessionContextBlocksTable.label,
         ],
@@ -408,7 +409,7 @@ export class D1SearchProvider {
 
   constructor(
     private readonly database: Database,
-    private readonly tenantId: string,
+    private readonly notebookId: NotebookId,
     private readonly sessionId: string,
   ) {}
 
@@ -422,7 +423,7 @@ export class D1SearchProvider {
       .from(SessionSearchEntriesTable)
       .where(
         and(
-          eq(SessionSearchEntriesTable.tenantID, this.tenantId),
+          eq(SessionSearchEntriesTable.notebookID, this.notebookId),
           eq(SessionSearchEntriesTable.sessionID, this.sessionId),
           eq(SessionSearchEntriesTable.label, this.label),
         ),
@@ -448,7 +449,7 @@ export class D1SearchProvider {
       .from(SessionSearchEntriesTable)
       .where(
         and(
-          eq(SessionSearchEntriesTable.tenantID, this.tenantId),
+          eq(SessionSearchEntriesTable.notebookID, this.notebookId),
           eq(SessionSearchEntriesTable.sessionID, this.sessionId),
           eq(SessionSearchEntriesTable.label, this.label),
           ...terms.map((term) => like(SessionSearchEntriesTable.content, `%${term}%`)),
@@ -468,7 +469,7 @@ export class D1SearchProvider {
     await this.database
       .insert(SessionSearchEntriesTable)
       .values({
-        tenantID: this.tenantId,
+        notebookID: this.notebookId,
         sessionID: this.sessionId,
         label: this.label,
         key,
@@ -477,7 +478,7 @@ export class D1SearchProvider {
       })
       .onConflictDoUpdate({
         target: [
-          SessionSearchEntriesTable.tenantID,
+          SessionSearchEntriesTable.notebookID,
           SessionSearchEntriesTable.sessionID,
           SessionSearchEntriesTable.label,
           SessionSearchEntriesTable.key,
