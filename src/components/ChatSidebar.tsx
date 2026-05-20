@@ -16,11 +16,9 @@ import type { getThreads } from "#/lib/functions/threads.functions";
 type ChatSidebarProps = {
   notebookID: string;
   threads: Awaited<ReturnType<typeof getThreads>>;
-  onCreate: (data: { title: string; notebookID: string }) => void | Promise<void>;
-  onDelete: (data: { id: string }) => void | Promise<void>;
 };
 
-export function AppSidebar({ notebookID, threads, onCreate, onDelete }: ChatSidebarProps) {
+export function AppSidebar({ notebookID, threads }: ChatSidebarProps) {
   return (
     <Sidebar>
       <SidebarHeader>
@@ -32,9 +30,7 @@ export function AppSidebar({ notebookID, threads, onCreate, onDelete }: ChatSide
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuButton onClick={() => onCreate({ title: "New Thread", notebookID })}>
-                New Thread
-              </SidebarMenuButton>
+              <SidebarMenuButton>New Thread</SidebarMenuButton>
             </SidebarMenu>
           </SidebarGroupContent>
           <SidebarGroupLabel>Threads</SidebarGroupLabel>
@@ -51,7 +47,6 @@ export function AppSidebar({ notebookID, threads, onCreate, onDelete }: ChatSide
 
                     <button
                       type="button"
-                      onClick={() => onDelete({ id: thread.id })}
                       className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-destructive hover:text-destructive-foreground"
                       aria-label={`Delete ${thread.title}`}
                     >
