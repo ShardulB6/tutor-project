@@ -10,5 +10,3 @@ export const createSession = async (
   database: Database,
   notebookId: NotebookId,
 ) => new Session(await D1SessionProvider.create(database, notebookId, sessionId));
-
-export { D1SessionProvider };
