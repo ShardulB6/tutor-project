@@ -51,7 +51,6 @@ export const updateServerNotebook = createServerFn({ method: "POST" })
     return { success: true };
   });
 
-
 export const deleteServerNotebook = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({
@@ -64,7 +63,6 @@ export const deleteServerNotebook = createServerFn({ method: "POST" })
     await db
       .delete(NotebooksTable)
       .where(and(eq(NotebooksTable.id, data.id), eq(NotebooksTable.userID, session.user.id)));
-      
 
     return { success: true };
   });

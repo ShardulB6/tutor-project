@@ -6,9 +6,5 @@ export const Route = createFileRoute("/_authenticated/$notebookID/_sidebar/_pane
 
 function RouteComponent() {
   const { chatID } = Route.useParams();
-  return (
-    <div>
-
-    </div>
-  );
+  return <div></div>;
 }

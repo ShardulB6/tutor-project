@@ -1,9 +1,7 @@
 import { createServerOnlyFn } from "@tanstack/react-start";
 import { ensureSession } from "../auth/auth.functions";
 import { db } from "#/db";
-import {
-  type NotebookId,
-} from "#/db/schema";
+import { type NotebookId } from "#/db/schema";
 
 import { and, eq } from "drizzle-orm";
 
