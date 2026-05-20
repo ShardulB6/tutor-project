@@ -1,6 +1,10 @@
 allowBuilds:
+  better-sqlite3: false
+  core-js-pure: false
   esbuild: false
   lightningcss: false
+  sharp: false
+  workerd: false
 
 overrides:
   vite: npm:@voidzero-dev/vite-plus-core@latest
