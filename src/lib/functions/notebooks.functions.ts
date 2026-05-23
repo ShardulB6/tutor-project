@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { ensureSession } from "../auth/auth.functions";
+import { ensureAuthSession } from "../auth/auth.functions";
 import { db } from "#/db";
 import { NotebooksTable } from "#/db/schema";
 import { createInsertSchema } from "drizzle-zod";
@@ -8,7 +8,7 @@ import { eq, and } from "drizzle-orm";
 import z from "zod";
 
 export const getServerNotebooks = createServerFn({ method: "GET" }).handler(async () => {
-  const session = await ensureSession();
+  const session = await ensureAuthSession();
   const notebooksResult = db
     .select()
     .from(NotebooksTable)
@@ -26,7 +26,7 @@ const insertNotebookSchema = createInsertSchema(NotebooksTable)
 export const createServerNotebook = createServerFn({ method: "POST" })
   .inputValidator(insertNotebookSchema)
   .handler(async ({ data }) => {
-    const session = await ensureSession();
+    const session = await ensureAuthSession();
 
     await db.insert(NotebooksTable).values({
       title: data.title,
@@ -43,7 +43,7 @@ export const updateServerNotebook = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
-    const session = await ensureSession();
+    const session = await ensureAuthSession();
     await db
       .update(NotebooksTable)
       .set(data.data)
@@ -58,7 +58,7 @@ export const deleteServerNotebook = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
-    const session = await ensureSession();
+    const session = await ensureAuthSession();
 
     await db
       .delete(NotebooksTable)
