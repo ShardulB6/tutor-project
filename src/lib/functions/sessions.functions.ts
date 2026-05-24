@@ -6,6 +6,9 @@ import type { NotebookId } from "#/db/schema";
 import { createServerOnlyFn } from "@tanstack/react-start";
 import { D1SessionProvider } from "../sessions/d1-session-provider";
 import { ensureNotebook } from "./ensure.function";
+import { AIChatAgent } from "@cloudflare/ai-chat";
+import { createWorkersAI } from "workers-ai-provider";
+import { streamText, convertToModelMessages } from "ai";
 
 export const getChatSession = createServerOnlyFn(
   async (notebookId: NotebookId, sessionId?: string) => {
@@ -21,3 +24,5 @@ export const getServerNotebooks = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const chatSession = await getChatSession(data.notebookId, data.sessionId);
   });
+
+export const saveChatMessage = createServerFn({ method: "POST" });
