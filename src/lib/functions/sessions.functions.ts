@@ -6,9 +6,8 @@ import type { NotebookId } from "#/db/schema";
 import { createServerOnlyFn } from "@tanstack/react-start";
 import { D1SessionProvider } from "../sessions/d1-session-provider";
 import { ensureNotebook } from "./ensure.function";
-import { AIChatAgent } from "@cloudflare/ai-chat";
-import { createWorkersAI } from "workers-ai-provider";
-import { streamText, convertToModelMessages } from "ai";
+import { createVercel } from '@ai-sdk/vercel';
+import { convertToModelMessages, streamText } from "ai";
 
 export const getChatSession = createServerOnlyFn(
   async (notebookId: NotebookId, sessionId?: string) => {
@@ -25,4 +24,32 @@ export const getServerNotebooks = createServerFn({ method: "GET" })
     const chatSession = await getChatSession(data.notebookId, data.sessionId);
   });
 
-export const saveChatMessage = createServerFn({ method: "POST" });
+export const saveChatMessage = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      sessionId: z.string(),
+      notebookId: z.string().brand("NotebookId"),
+      message: z.string(),
+      role: z.string(),
+      AIModel: z.string(),
+    }),
+  )
+  .handler(async ({ data }) => {
+
+    const vercel = await createVercel({
+      apiKey: process.env.VERCEL_API_KEY ?? "",
+    });
+
+    const result = streamText({
+      model: data.AIModel,
+      messages: [
+        {
+          role: "assistant",
+          content: data.message,
+        },
+      ],
+    });
+  });
+
+
+
