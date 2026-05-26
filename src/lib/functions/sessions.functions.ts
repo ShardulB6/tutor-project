@@ -6,8 +6,8 @@ import type { NotebookId } from "#/db/schema";
 import { createServerOnlyFn } from "@tanstack/react-start";
 import { D1SessionProvider } from "../sessions/d1-session-provider";
 import { ensureNotebook } from "./ensure.function";
-import { createVercel } from '@ai-sdk/vercel';
-import { convertToModelMessages, streamText } from "ai";
+import { createVercel } from "@ai-sdk/vercel";
+import { convertToModelMessages, streamText, type UIMessage } from "ai";
 
 export const getChatSession = createServerOnlyFn(
   async (notebookId: NotebookId, sessionId?: string) => {
@@ -35,21 +35,25 @@ export const saveChatMessage = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
-
     const vercel = await createVercel({
       apiKey: process.env.VERCEL_API_KEY ?? "",
     });
 
-    const result = streamText({
-      model: data.AIModel,
-      messages: [
+    const userMessage: UIMessage = {
+      id: crypto.randomUUID(),
+      role: "user",
+      parts: [
         {
-          role: "assistant",
-          content: data.message,
+          type: "text",
+          text: data.message,
         },
       ],
+    };
+
+    const result = streamText({
+      model: vercel(data.AIModel),
+      messages: await convertToModelMessages([userMessage]),
     });
+
+    return result.toUIMessageStreamResponse();
   });
-
-
-
