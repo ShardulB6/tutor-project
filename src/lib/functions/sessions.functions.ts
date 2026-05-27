@@ -35,7 +35,7 @@ export const saveChatMessage = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
-    const vercel = await createVercel({
+    const vercel = createVercel({
       apiKey: process.env.VERCEL_API_KEY ?? "",
     });
 
