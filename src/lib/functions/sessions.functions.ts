@@ -34,7 +34,7 @@ export const saveChatMessage = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const vercel = createVercel({
-      apiKey: process.env.AI_GATEWAY_API_KEY ?? "",
+      apiKey: process.env.AI_GATEWAY_API_KEY,
     });
 
     const chatSession = await getChatSession(data.notebookId, data.sessionId);
