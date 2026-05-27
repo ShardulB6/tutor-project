@@ -39,6 +39,8 @@ export const saveChatMessage = createServerFn({ method: "POST" })
       apiKey: process.env.VERCEL_API_KEY ?? "",
     });
 
+    const chatSession = await getChatSession(data.notebookId, data.sessionId);
+
     const userMessage: UIMessage = {
       id: crypto.randomUUID(),
       role: "user",
@@ -49,11 +51,16 @@ export const saveChatMessage = createServerFn({ method: "POST" })
         },
       ],
     };
-
+    await chatSession.appendMessage(userMessage);
     const result = streamText({
       model: vercel(data.AIModel),
       messages: await convertToModelMessages([userMessage]),
     });
 
-    return result.toUIMessageStreamResponse();
+    const aiMessage: UIMessage = {
+      id: crypto.randomUUID(),
+      role: "assistant",
+      parts: [],
+    };
+    await chatSession.appendMessage(aiMessage);
   });
