@@ -20,9 +20,7 @@ export const getChatSession = createServerOnlyFn(
 
 export const getServerNotebooks = createServerFn({ method: "GET" })
   .inputValidator(z.object({ sessionId: z.string(), notebookId: z.string().brand("NotebookId") }))
-  .handler(async ({ data }) => {
-    const chatSession = await getChatSession(data.notebookId, data.sessionId);
-  });
+  .handler(async () => {});
 
 export const saveChatMessage = createServerFn({ method: "POST" })
   .inputValidator(
@@ -55,12 +53,17 @@ export const saveChatMessage = createServerFn({ method: "POST" })
     const result = streamText({
       model: vercel(data.AIModel),
       messages: await convertToModelMessages([userMessage]),
+      onFinish: ({ text }) => {
+        void chatSession.appendMessage({
+          id: crypto.randomUUID(),
+          role: "assistant",
+          parts: [
+            {
+              type: "text",
+              text,
+            },
+          ],
+        });
+      },
     });
-
-    const aiMessage: UIMessage = {
-      id: crypto.randomUUID(),
-      role: "assistant",
-      parts: [],
-    };
-    await chatSession.appendMessage(aiMessage);
   });
