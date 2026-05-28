@@ -9,6 +9,7 @@ import { D1SessionProvider } from "../sessions/d1-session-provider";
 import { ensureNotebook } from "./ensure.function";
 import { createVercel } from "@ai-sdk/vercel";
 import { Think } from "@cloudflare/think";
+import { randomUUID } from "crypto";
 
 type MyConfig = {
   modelName: string;
@@ -35,9 +36,14 @@ export const saveChatMessage = createServerFn({ method: "POST" })
       message: z.string(),
       role: z.string(),
       AIModel: z.string(),
+      parentId: z.string().optional(),
     }),
   )
-  .handler(async ({ data: _data }) => {
+  .handler(async ({ data }) => {
+    if (data.parentId == undefined) {
+      data.parentId = crypto.randomUUID();
+    }
+
     // await chatSession.appendMessage(userMessage);
     // const result = streamText({
     //   model: vercel(data.AIModel),
