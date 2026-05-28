@@ -7,7 +7,7 @@ import { createServerOnlyFn } from "@tanstack/react-start";
 import { D1SessionProvider } from "../sessions/d1-session-provider";
 import { ensureNotebook } from "./ensure.function";
 import { createVercel } from "@ai-sdk/vercel";
-import { convertToModelMessages, streamText, type UIMessage } from "ai";
+import { Think } from "@cloudflare/think";
 
 export const getChatSession = createServerOnlyFn(
   async (notebookId: NotebookId, sessionId?: string) => {
@@ -32,38 +32,28 @@ export const saveChatMessage = createServerFn({ method: "POST" })
       AIModel: z.string(),
     }),
   )
-  .handler(async ({ data }) => {
-    const vercel = createVercel({
-      apiKey: process.env.AI_GATEWAY_API_KEY,
-    });
-
-    const chatSession = await getChatSession(data.notebookId, data.sessionId);
-
-    const userMessage: UIMessage = {
-      id: crypto.randomUUID(),
-      role: "user",
-      parts: [
-        {
-          type: "text",
-          text: data.message,
-        },
-      ],
-    };
-    await chatSession.appendMessage(userMessage);
-    const result = streamText({
-      model: vercel(data.AIModel),
-      messages: await convertToModelMessages([userMessage]),
-      onFinish: ({ text }) => {
-        void chatSession.appendMessage({
-          id: crypto.randomUUID(),
-          role: "assistant",
-          parts: [
-            {
-              type: "text",
-              text,
-            },
-          ],
-        });
-      },
-    });
+  .handler(async ({ data: _data }) => {
+    // await chatSession.appendMessage(userMessage);
+    // const result = streamText({
+    //   model: vercel(data.AIModel),
+    //   messages: await convertToModelMessages([userMessage]),
+    //   onFinish: ({ text }) => {
+    //     void chatSession.appendMessage({
+    //       id: crypto.randomUUID(),
+    //       role: "assistant",
+    //       parts: [
+    //         {
+    //           type: "text",
+    //           text,
+    //         },
+    //       ],
+    //     });
+    //   },
+    // });
   });
+
+export class myAgent extends Think<Env, unknown, { modelName: string }> {
+  getModel() {
+    return createVercel({ apiKey: process.env.AI_GATEWAY_API_KEY })(this.name);
+  }
+}
