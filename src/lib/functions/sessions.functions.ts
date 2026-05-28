@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import z from "zod";
 import { Session } from "agents/experimental/memory/session";
+import { callable } from "agents";
 import { db } from "#/db";
 import type { NotebookId } from "#/db/schema";
 import { createServerOnlyFn } from "@tanstack/react-start";
@@ -8,6 +9,10 @@ import { D1SessionProvider } from "../sessions/d1-session-provider";
 import { ensureNotebook } from "./ensure.function";
 import { createVercel } from "@ai-sdk/vercel";
 import { Think } from "@cloudflare/think";
+
+type MyConfig = {
+  modelName: string;
+};
 
 export const getChatSession = createServerOnlyFn(
   async (notebookId: NotebookId, sessionId?: string) => {
@@ -52,8 +57,15 @@ export const saveChatMessage = createServerFn({ method: "POST" })
     // });
   });
 
-export class myAgent extends Think<Env, unknown, { modelName: string }> {
+export class myAgent extends Think<Env> {
   getModel() {
-    return createVercel({ apiKey: process.env.AI_GATEWAY_API_KEY })(this.name);
+    const modelName = this.getConfig<MyConfig>()?.modelName ?? "openai/gpt-oss-120b";
+
+    return createVercel({ apiKey: process.env.AI_GATEWAY_API_KEY })(modelName);
+  }
+
+  @callable()
+  updateConfig(config: MyConfig) {
+    this.configure<MyConfig>(config);
   }
 }
