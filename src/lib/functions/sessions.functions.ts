@@ -10,16 +10,27 @@ import { createVercel } from "@ai-sdk/vercel";
 import { Think } from "@cloudflare/think";
 import { env as serverEnv } from "../env";
 
-type MyConfig = {
-  modelName: string;
-};
+const defaultSoulPrompt = "You are a helpful coding assistant.";
+
+function configureThinkSession(session: Session): Session {
+  return session.withContext("soul", {
+    provider: {
+      get: async () => defaultSoulPrompt,
+    },
+  });
+}
+
+async function createD1ThinkSession(notebookId: NotebookId, sessionId?: string): Promise<Session> {
+  const resolvedSessionId = sessionId ?? crypto.randomUUID();
+  const provider = await D1SessionProvider.create(db, notebookId, resolvedSessionId);
+
+  return configureThinkSession(Session.create(provider).forSession(resolvedSessionId));
+}
 
 export const getChatSession = createServerOnlyFn(
   async (notebookId: NotebookId, sessionId?: string) => {
     await ensureNotebook(notebookId);
-    return new Session(
-      await D1SessionProvider.create(db, notebookId, sessionId ?? crypto.randomUUID()),
-    );
+    return createD1ThinkSession(notebookId, sessionId);
   },
 );
 
@@ -65,5 +76,8 @@ export const saveChatMessage = createServerFn({ method: "POST" })
 export class myAgent extends Think<Env> {
   getModel() {
     return createVercel({ apiKey: serverEnv.AI_GATEWAY_API_KEY })("openai/gpt-oss-120b");
+  }
+  configureSession(session: Session) {
+    return configureThinkSession(session);
   }
 }
