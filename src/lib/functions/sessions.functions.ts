@@ -9,8 +9,18 @@ import { ensureNotebook } from "./ensure.function";
 import { createVercel } from "@ai-sdk/vercel";
 import { Think } from "@cloudflare/think";
 import { env as serverEnv } from "../env";
+import type { SessionMessage } from "agents/experimental/memory/session";
 
 const defaultSoulPrompt = "You are a helpful coding assistant.";
+
+export class myAgent extends Think<Env> {
+  getModel() {
+    return createVercel({ apiKey: serverEnv.AI_GATEWAY_API_KEY })("openai/gpt-oss-120b");
+  }
+  configureSession(session: Session) {
+    return configureThinkSession(session);
+  }
+}
 
 function configureThinkSession(session: Session): Session {
   return session.withContext("soul", {
@@ -72,12 +82,3 @@ export const saveChatMessage = createServerFn({ method: "POST" })
     //   },
     // });
   });
-
-export class myAgent extends Think<Env> {
-  getModel() {
-    return createVercel({ apiKey: serverEnv.AI_GATEWAY_API_KEY })("openai/gpt-oss-120b");
-  }
-  configureSession(session: Session) {
-    return configureThinkSession(session);
-  }
-}
