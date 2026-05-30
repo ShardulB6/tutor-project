@@ -9,7 +9,7 @@ import { ensureNotebook } from "./ensure.function";
 import { createVercel } from "@ai-sdk/vercel";
 import { Think } from "@cloudflare/think";
 import { env as serverEnv } from "../env";
-import type { SessionMessage } from "agents/experimental/memory/session";
+import type { UIMessage } from "ai";
 
 const defaultSoulPrompt = "You are a helpful coding assistant.";
 
@@ -54,16 +54,39 @@ export const saveChatMessage = createServerFn({ method: "POST" })
       sessionId: z.string(),
       notebookId: z.string().brand("NotebookId"),
       message: z.string(),
-      role: z.string(),
       AIModel: z.string(),
       parentId: z.string().optional(),
     }),
   )
   .handler(async ({ data }) => {
-    if (data.parentId == undefined) {
-      data.parentId = crypto.randomUUID();
-    }
+    if (!data.parentId) {
+      const parent = crypto.randomUUID();
 
+      const userMessage: UIMessage = {
+        role: "user",
+        id: crypto.randomUUID(),
+        parts: [
+          {
+            type: "text",
+            text: data.message,
+          },
+        ],
+      };
+
+      const aiMessage: UIMessage = {
+        role: "assistant",
+        id: crypto.randomUUID(),
+        parts: [
+          {
+            type: "text",
+            text: "",
+          },
+        ],
+      };
+      await getChatSession(data.notebookId, data.sessionId).then((session) =>
+        session.appendMessage(userMessage, parent),
+      );
+    }
     // await chatSession.appendMessage(userMessage);
     // const result = streamText({
     //   model: vercel(data.AIModel),
