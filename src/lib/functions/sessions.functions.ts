@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import z from "zod";
 import { Session } from "agents/experimental/memory/session";
 import { db } from "#/db";
@@ -6,7 +7,7 @@ import type { NotebookId } from "#/db/schema";
 import { createServerOnlyFn } from "@tanstack/react-start";
 import { D1SessionProvider } from "../sessions/d1-session-provider";
 import { ensureNotebook } from "./ensure.function";
-import type { UIMessage } from "ai";
+import { convertToModelMessages, streamText, type UIMessage } from "ai";
 
 async function createD1ChatSession(notebookId: NotebookId, sessionId?: string): Promise<Session> {
   const resolvedSessionId = sessionId ?? crypto.randomUUID();
@@ -33,53 +34,38 @@ export const saveChatMessage = createServerFn({ method: "POST" })
       notebookId: z.string().brand("NotebookId"),
       message: z.string(),
       AIModel: z.string(),
-      parentId: z.string().optional(),
     }),
   )
   .handler(async ({ data }) => {
-    if (!data.parentId) {
-      const parent = crypto.randomUUID();
+    const request = getRequest();
 
-      const userMessage: UIMessage = {
-        role: "user",
-        id: crypto.randomUUID(),
-        parts: [
-          {
-            type: "text",
-            text: data.message,
-          },
-        ],
-      };
-
-      const aiMessage: UIMessage = {
-        role: "assistant",
-        id: crypto.randomUUID(),
-        parts: [
-          {
-            type: "text",
-            text: "",
-          },
-        ],
-      };
-      await getChatSession(data.notebookId, data.sessionId).then((session) =>
-        session.appendMessage(userMessage, parent),
-      );
-    }
-    // await chatSession.appendMessage(userMessage);
-    // const result = streamText({
-    //   model: vercel(data.AIModel),
-    //   messages: await convertToModelMessages([userMessage]),
-    //   onFinish: ({ text }) => {
-    //     void chatSession.appendMessage({
-    //       id: crypto.randomUUID(),
-    //       role: "assistant",
-    //       parts: [
-    //         {
-    //           type: "text",
-    //           text,
-    //         },
-    //       ],
-    //     });
-    //   },
-    // });
+    const userMessage: UIMessage = {
+      role: "user",
+      id: crypto.randomUUID(),
+      parts: [
+        {
+          type: "text",
+          text: data.message,
+        },
+      ],
+    };
+    const chatSession = await getChatSession(data.notebookId, data.sessionId);
+    await chatSession.appendMessage(userMessage);
+    const _result = streamText({
+      model: data.AIModel,
+      messages: await convertToModelMessages([userMessage]),
+      abortSignal: request.signal,
+      onFinish: ({ text }) => {
+        void chatSession.appendMessage({
+          id: crypto.randomUUID(),
+          role: "assistant",
+          parts: [
+            {
+              type: "text",
+              text,
+            },
+          ],
+        });
+      },
+    });
   });
