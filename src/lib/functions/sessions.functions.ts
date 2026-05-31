@@ -7,7 +7,7 @@ import type { NotebookId } from "#/db/schema";
 import { createServerOnlyFn } from "@tanstack/react-start";
 import { D1SessionProvider } from "../sessions/d1-session-provider";
 import { ensureNotebook } from "./ensure.function";
-import { convertToModelMessages, streamText, type UIMessage } from "ai";
+import { convertToModelMessages, createUIMessageStream, streamText, type UIMessage } from "ai";
 
 async function createD1ChatSession(notebookId: NotebookId, sessionId?: string): Promise<Session> {
   const resolvedSessionId = sessionId ?? crypto.randomUUID();
@@ -51,21 +51,24 @@ export const saveChatMessage = createServerFn({ method: "POST" })
     };
     const chatSession = await getChatSession(data.notebookId, data.sessionId);
     await chatSession.appendMessage(userMessage);
-    const _result = streamText({
+    const result = streamText({
       model: data.AIModel,
       messages: await convertToModelMessages([userMessage]),
       abortSignal: request.signal,
-      onFinish: ({ text }) => {
-        void chatSession.appendMessage({
-          id: crypto.randomUUID(),
-          role: "assistant",
-          parts: [
-            {
-              type: "text",
-              text,
-            },
-          ],
-        });
-      },
     });
+
+    const saveAssistantMessage = async (message: UIMessage) => {
+      await chatSession.appendMessage(message);
+    };
+
+    const uiMessageStream = createUIMessageStream({
+      execute: ({ writer }) => {
+        writer.merge(result.toUIMessageStream());
+      },
+      generateId: () => crypto.randomUUID(),
+      onStepFinish: ({ responseMessage }) => saveAssistantMessage(responseMessage),
+      onFinish: ({ responseMessage }) => saveAssistantMessage(responseMessage),
+    });
+
+    await uiMessageStream.pipeTo(new WritableStream());
   });
