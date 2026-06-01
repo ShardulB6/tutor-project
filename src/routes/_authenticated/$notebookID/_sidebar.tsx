@@ -56,11 +56,6 @@ export function AppSidebar({ notebookID }: ChatSidebarProps) {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuButton>New Thread</SidebarMenuButton>
-            </SidebarMenu>
-          </SidebarGroupContent>
           <SidebarGroupLabel>Threads</SidebarGroupLabel>
         </SidebarGroup>
       </SidebarContent>
