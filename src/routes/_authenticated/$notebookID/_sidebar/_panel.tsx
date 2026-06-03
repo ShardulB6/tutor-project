@@ -64,19 +64,22 @@ function EnterBar(props: { className?: string }) {
   };
 
   return (
-    <form className={cn("flex w-full items-center gap-2", props.className)} onSubmit={handleSubmit}>
+    <form className={cn("flex w-full flex-col gap-2", props.className)} onSubmit={handleSubmit}>
       <input
         ref={inputRef}
-        className="h-10 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none"
+        className="h-10 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none w-full"
         type="text"
         placeholder="Enter text"
       />
-      <button
-        className="h-10 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-        type="submit"
-      >
-        Submit
-      </button>
+      <div className="flex">
+        <Example />
+        <button
+          className="h-10 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ml-auto"
+          type="submit"
+        >
+          Submit
+        </button>
+      </div>
     </form>
   );
 }
@@ -85,29 +88,29 @@ const models = [
   {
     chef: "OpenAI",
     chefSlug: "openai",
-    id: "gpt-4o",
+    id: "openai/gpt-4o",
     name: "GPT-4o",
     providers: ["openai", "azure"],
   },
   {
     chef: "OpenAI",
     chefSlug: "openai",
-    id: "gpt-4o-mini",
+    id: "openai/gpt-4o-mini",
     name: "GPT-4o Mini",
     providers: ["openai", "azure"],
   },
   {
     chef: "OpenAI",
     chefSlug: "openai",
-    id: "o1",
+    id: "openai/o1",
     name: "o1",
     providers: ["openai", "azure"],
   },
   {
     chef: "OpenAI",
     chefSlug: "openai",
-    id: "o1-mini",
-    name: "o1 Mini",
+    id: "openai/gpt-oss-120b",
+    name: "gpt-oss-120b",
     providers: ["openai", "azure"],
   },
   {
@@ -386,7 +389,7 @@ const Example = () => {
   const chefs = [...new Set(models.map((model) => model.chef))];
 
   return (
-    <div className="flex size-full items-center justify-center p-8">
+    <div>
       <ModelSelector onOpenChange={setOpen} open={open}>
         <ModelSelectorTrigger asChild>
           <Button className="w-[200px] justify-between" variant="outline">
