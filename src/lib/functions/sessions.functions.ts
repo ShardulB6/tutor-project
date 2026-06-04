@@ -72,3 +72,17 @@ export const saveChatMessage = createServerFn({ method: "POST" })
 
     await uiMessageStream.pipeTo(new WritableStream());
   });
+
+export const CreateBranch = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      sessionId: z.string(),
+      notebookId: z.string().brand("NotebookId"),
+      messageId: z.string(),
+      leafId: z.string(),
+    }),
+  )
+  .handler(async ({ data }) => {
+    const chatSession = await getChatSession(data.notebookId, data.sessionId);
+    await chatSession.getBranches(data.messageId);
+  });
