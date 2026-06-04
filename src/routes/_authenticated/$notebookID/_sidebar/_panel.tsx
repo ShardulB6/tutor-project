@@ -27,6 +27,7 @@ function RouteComponent() {
       <ResizablePanel defaultSize="60%">
         <div className="flex h-full flex-col px-3">
           <div className="flex-1">
+            <Chat />
             <Outlet />
           </div>
           <div className="py-3">
@@ -75,7 +76,7 @@ function EnterBar(props: { className?: string }) {
   );
 }
 
-function chat() {
+function Chat() {
   const { messages, status } = useChat();
 
   return (
