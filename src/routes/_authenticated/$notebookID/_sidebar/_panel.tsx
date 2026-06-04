@@ -9,8 +9,6 @@ import { mermaid } from "@streamdown/mermaid";
 import { math } from "@streamdown/math";
 import { cjk } from "@streamdown/cjk";
 
-import { Example } from "@/components/ModelPicker";
-
 export const Route = createFileRoute("/_authenticated/$notebookID/_sidebar/_panel")({
   component: RouteComponent,
 });
@@ -64,7 +62,6 @@ function EnterBar(props: { className?: string }) {
         placeholder="Enter text"
       />
       <div className="flex">
-        <Example />
         <button
           className="h-10 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ml-auto"
           type="submit"
