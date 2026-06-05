@@ -8,6 +8,23 @@ import { createServerOnlyFn } from "@tanstack/react-start";
 import { D1SessionProvider } from "../sessions/d1-session-provider";
 import { ensureNotebook } from "./ensure.function";
 import { convertToModelMessages, createUIMessageStream, streamText, type UIMessage } from "ai";
+import type { SessionMessage } from "agents/experimental/memory/session";
+
+type SerializableChatMessage = {
+  id: string;
+  role: SessionMessage["role"];
+  parts: Array<{ type: "text"; text: string }>;
+};
+
+function toSerializableChatMessage(message: SessionMessage): SerializableChatMessage {
+  return {
+    id: message.id,
+    role: message.role,
+    parts: message.parts
+      .filter((part) => part.type === "text")
+      .map((part) => ({ type: "text", text: part.text ?? "" })),
+  };
+}
 
 async function createD1ChatSession(notebookId: NotebookId, sessionId?: string): Promise<Session> {
   const resolvedSessionId = sessionId ?? crypto.randomUUID();
@@ -85,4 +102,19 @@ export const CreateBranch = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const chatSession = await getChatSession(data.notebookId, data.sessionId);
     await chatSession.getBranches(data.messageId);
+  });
+
+export const getMessages = createServerFn({ method: "GET" })
+  .inputValidator(
+    z.object({
+      sessionId: z.string(),
+      notebookId: z.string().brand("NotebookId"),
+      leafId: z.string(),
+    }),
+  )
+  .handler(async ({ data }) => {
+    const chatSession = await getChatSession(data.notebookId, data.sessionId);
+    const messages = await chatSession.getHistory(data.leafId);
+
+    return messages.map(toSerializableChatMessage);
   });
