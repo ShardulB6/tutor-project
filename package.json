@@ -23,6 +23,7 @@
   "dependencies": {
     "@ai-sdk/openai": "^3.0.60",
     "@ai-sdk/react": "^3.0.179",
+    "@cloudflare/ai-chat": "^0.7.2",
     "@cloudflare/think": "^0.7.3",
     "@cloudflare/vite-plugin": "^1.36.4",
     "@radix-ui/react-use-controllable-state": "^1.2.2",

@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { TutorChat } from "#/components/TutorChat";
 
 export const Route = createFileRoute("/_authenticated/$notebookID/_sidebar/_panel/$chatID")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const { chatID } = Route.useParams();
-  return <div></div>;
+  const { chatID, notebookID } = Route.useParams();
+
+  return <TutorChat notebookID={notebookID} sessionID={chatID} />;
 }
