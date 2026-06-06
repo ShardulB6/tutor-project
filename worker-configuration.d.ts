@@ -4,6 +4,7 @@
 declare namespace Cloudflare {
 	interface Env {
 		DB: D1Database;
+		TutorAgent: DurableObjectNamespace;
 		BETTER_AUTH_URL: string;
 		BETTER_AUTH_SECRET: string;
 		DATABASE_URL: string;
