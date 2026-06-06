@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { TutorChat } from "#/components/TutorChat";
+import { TutorChat } from "#/routes/_authenticated/$notebookID/_sidebar/-component/TutorChat";
 
 export const Route = createFileRoute("/_authenticated/$notebookID/_sidebar/_panel/$chatID")({
   component: RouteComponent,
