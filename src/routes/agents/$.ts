@@ -7,7 +7,7 @@ async function handleAgentRequest(request: Request) {
     (await routeAgentRequest(request, env)) ?? new Response("Agent not found", { status: 404 })
   );
 }
-
+// TODO: add middleware to check if user request owns the notebook
 export const Route = createFileRoute("/agents/$")({
   server: {
     handlers: {
