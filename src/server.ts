@@ -1,4 +1,4 @@
-export { TutorAgent } from "./agents/tutor-agent";
+export { TutorAgent } from "./routes/agents/-agents/tutor-agent";
 
 import handler from "@tanstack/react-start/server-entry";
 
