@@ -24,14 +24,12 @@ function RouteComponent() {
     <div>
       <SidebarProvider>
         <AppSidebar notebookID={notebookID} />
-        <main className="flex-1">
-          <SidebarInset>
-            <div className="absolute left-3 top-3 z-50 flex items-center gap-2">
-              <SidebarTrigger />
-            </div>
-          </SidebarInset>
+        <SidebarInset className="h-screen overflow-hidden">
+          <div className="absolute left-3 top-3 z-50 flex items-center gap-2">
+            <SidebarTrigger />
+          </div>
           <Outlet />
-        </main>
+        </SidebarInset>
       </SidebarProvider>
     </div>
   );

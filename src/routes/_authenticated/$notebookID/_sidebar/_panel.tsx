@@ -7,17 +7,15 @@ export const Route = createFileRoute("/_authenticated/$notebookID/_sidebar/_pane
 
 function RouteComponent() {
   return (
-    <ResizablePanelGroup className="h-svh" orientation="horizontal">
+    <ResizablePanelGroup orientation="horizontal">
       <ResizablePanel defaultSize="20%" minSize="10%">
         <div className="flex h-20 items-center justify-center p-6">
           <span className="font-semibold">Files</span>
         </div>
       </ResizablePanel>
       <ResizableHandle />
-      <ResizablePanel defaultSize="60%" minSize="40%">
-        <div className="h-full min-h-0">
-          <Outlet />
-        </div>
+      <ResizablePanel className="h-screen" defaultSize="60%" minSize="40%">
+        <Outlet />
       </ResizablePanel>
       <ResizableHandle />
       <ResizablePanel defaultSize="20%" minSize="10%">
