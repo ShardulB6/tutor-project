@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_authenticated/$notebookID/_sidebar")({
 });
 
 function RouteComponent() {
-  const { notebookID } = Route.useParams();
+
   const { notebook } = Route.useLoaderData();
 
   return (
@@ -45,7 +45,7 @@ type ChatSidebarProps = {
 };
 
 export function AppSidebar({ notebook }: ChatSidebarProps) {
-  // const { threads } = Route.useLoaderData();
+
   return (
     <Sidebar>
       <SidebarHeader>
