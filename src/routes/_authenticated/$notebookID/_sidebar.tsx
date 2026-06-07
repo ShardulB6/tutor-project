@@ -23,11 +23,12 @@ export const Route = createFileRoute("/_authenticated/$notebookID/_sidebar")({
 
 function RouteComponent() {
   const { notebookID } = Route.useParams();
+  const { notebook } = Route.useLoaderData();
 
   return (
     <div>
       <SidebarProvider>
-        <AppSidebar notebookID={notebookID} />
+        <AppSidebar notebook={notebook} />
         <SidebarInset className="h-screen overflow-hidden">
           <div className="absolute left-3 top-3 z-50 flex items-center gap-2">
             <SidebarTrigger />
@@ -40,16 +41,16 @@ function RouteComponent() {
 }
 
 type ChatSidebarProps = {
-  notebookID: string;
+  notebook: any; // Replace 'any' with the actual type for your notebook object
 };
 
-export function AppSidebar({ notebookID }: ChatSidebarProps) {
+export function AppSidebar({ notebook }: ChatSidebarProps) {
   // const { threads } = Route.useLoaderData();
   return (
     <Sidebar>
       <SidebarHeader>
         <div>
-          <h3 style={{ margin: 0 }}>{notebookID}</h3>
+          <h3 style={{ margin: 0 }}>{notebook.title}</h3>
         </div>
       </SidebarHeader>
       <SidebarContent>
