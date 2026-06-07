@@ -29,11 +29,12 @@ export const NotebooksTable = sqliteTable("notebook", {
   ...timestamspColums,
 });
 
-export const notebookRelations = relations(NotebooksTable, ({ one }) => ({
+export const notebookRelations = relations(NotebooksTable, ({ one, many }) => ({
   user: one(authSchema.user, {
     fields: [NotebooksTable.userID],
     references: [authSchema.user.id],
   }),
+  sessionMessages: many(SessionMessagesTable),
 }));
 
 export const SessionMessagesTable = sqliteTable(
@@ -70,6 +71,13 @@ export const SessionMessagesTable = sqliteTable(
     ),
   ],
 );
+
+export const sessionMessagesRelations = relations(SessionMessagesTable, ({ one }) => ({
+  notebook: one(NotebooksTable, {
+    fields: [SessionMessagesTable.notebookID],
+    references: [NotebooksTable.id],
+  }),
+}));
 
 export const SessionCompactionsTable = sqliteTable(
   "assistant_compactions",
