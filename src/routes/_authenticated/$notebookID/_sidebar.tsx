@@ -8,11 +8,15 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
 } from "@/components/ui/sidebar";
+import { getServerNotebook } from "#/lib/functions/notebooks.functions";
+import z from "zod";
 
 export const Route = createFileRoute("/_authenticated/$notebookID/_sidebar")({
   loader: async ({ params }) => {
-    return { threads: [] };
+    const notebook = await getServerNotebook({ data: { id: params.notebookID } });
+    return { notebook };
   },
+  params: z.object({ notebookID: z.string().brand<"NotebookId">() }),
 
   component: RouteComponent,
 });
@@ -40,7 +44,7 @@ type ChatSidebarProps = {
 };
 
 export function AppSidebar({ notebookID }: ChatSidebarProps) {
-  const { threads } = Route.useLoaderData();
+  // const { threads } = Route.useLoaderData();
   return (
     <Sidebar>
       <SidebarHeader>

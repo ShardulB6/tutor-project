@@ -17,6 +17,16 @@ export const getServerNotebooks = createServerFn({ method: "GET" }).handler(asyn
   return notebooksResult;
 });
 
+export const getServerNotebook = createServerFn({ method: "GET" })
+  .inputValidator(z.object({ id: z.string().brand<"NotebookId">() }))
+  .handler(async ({ data }) => {
+    const session = await ensureAuthSession();
+    return db.query.NotebooksTable.findFirst({
+      where: (notebook, { eq, and }) =>
+        and(eq(notebook.id, data.id), eq(notebook.userID, session.user.id)),
+    });
+  });
+
 const insertNotebookSchema = createInsertSchema(NotebooksTable)
   .pick({
     title: true,
