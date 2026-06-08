@@ -9,12 +9,14 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar";
 import { getServerNotebook } from "#/lib/functions/notebooks.functions";
+import { getServerThreads } from "#/lib/functions/threads.function";
 import z from "zod";
 
 export const Route = createFileRoute("/_authenticated/$notebookID/_sidebar")({
   loader: async ({ params }) => {
     const notebook = await getServerNotebook({ data: { id: params.notebookID } });
-    return { notebook };
+    const threads = await getServerThreads({ data: { notebookId: params.notebookID } });
+    return { notebook, threads };
   },
   params: z.object({ notebookID: z.string().brand<"NotebookId">() }),
 
@@ -22,13 +24,12 @@ export const Route = createFileRoute("/_authenticated/$notebookID/_sidebar")({
 });
 
 function RouteComponent() {
-
-  const { notebook } = Route.useLoaderData();
+  const { notebook, threads } = Route.useLoaderData();
 
   return (
     <div>
       <SidebarProvider>
-        <AppSidebar notebook={notebook} />
+        <AppSidebar notebook={notebook} threads={threads} />
         <SidebarInset className="h-screen overflow-hidden">
           <div className="absolute left-3 top-3 z-50 flex items-center gap-2">
             <SidebarTrigger />
@@ -42,10 +43,10 @@ function RouteComponent() {
 
 type ChatSidebarProps = {
   notebook: any; // Replace 'any' with the actual type for your notebook object
+  threads: any; // Replace 'any' with the actual type for your threads object
 };
 
-export function AppSidebar({ notebook }: ChatSidebarProps) {
-
+export function AppSidebar({ notebook, threads }: ChatSidebarProps) {
   return (
     <Sidebar>
       <SidebarHeader>
@@ -56,6 +57,9 @@ export function AppSidebar({ notebook }: ChatSidebarProps) {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Threads</SidebarGroupLabel>
+          {threads.map((thread: any) => (
+            <div key={thread.id}>{thread.title}</div>
+          ))}
         </SidebarGroup>
       </SidebarContent>
 
