@@ -34,37 +34,7 @@ export const notebookRelations = relations(NotebooksTable, ({ one, many }) => ({
     fields: [NotebooksTable.userID],
     references: [authSchema.user.id],
   }),
-  chatSessions: many(ChatSessionsTable),
   sessionMessages: many(SessionMessagesTable),
-}));
-
-export const ChatSessionsTable = sqliteTable(
-  "chat_sessions",
-  {
-    notebookID: text("notebook_id")
-      .references(() => NotebooksTable.id, { onDelete: "cascade" })
-      .notNull(),
-    sessionID: text("session_id").notNull(),
-    name: text("name").notNull().default("New Chat"),
-    createdAt: integer("created_at", { mode: "timestamp_ms" })
-      .$defaultFn(() => new Date())
-      .notNull(),
-    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
-      .$defaultFn(() => new Date())
-      .$onUpdate(() => new Date())
-      .notNull(),
-  },
-  (table) => [
-    primaryKey({ columns: [table.notebookID, table.sessionID] }),
-    index("chat_sessions_notebook_updated_idx").on(table.notebookID, table.updatedAt),
-  ],
-);
-
-export const chatSessionsRelations = relations(ChatSessionsTable, ({ one }) => ({
-  notebook: one(NotebooksTable, {
-    fields: [ChatSessionsTable.notebookID],
-    references: [NotebooksTable.id],
-  }),
 }));
 
 export const SessionMessagesTable = sqliteTable(

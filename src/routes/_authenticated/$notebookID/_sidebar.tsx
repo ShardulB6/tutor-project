@@ -82,7 +82,7 @@ export function AppSidebar({ notebook, notebookID, threads }: ChatSidebarProps) 
               params={{ notebookID, chatID: thread.sessionID }}
               to="/$notebookID/$chatID"
             >
-              {thread.name}
+              {thread.sessionID}
             </Link>
           ))}
         </SidebarGroup>
