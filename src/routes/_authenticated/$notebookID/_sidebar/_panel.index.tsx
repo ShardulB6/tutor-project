@@ -1,12 +1,14 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { TutorChat } from "#/routes/_authenticated/$notebookID/_sidebar/-component/TutorChat";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/$notebookID/_sidebar/_panel/")({
-  component: RouteComponent,
+  beforeLoad: ({ params }) => {
+    throw redirect({
+      to: "/$notebookID/$chatID",
+      params: {
+        notebookID: params.notebookID,
+        chatID: crypto.randomUUID(),
+      },
+      replace: true,
+    });
+  },
 });
-
-function RouteComponent() {
-  const { notebookID } = Route.useParams();
-
-  return <TutorChat notebookID={notebookID} sessionID={notebookID} />;
-}
