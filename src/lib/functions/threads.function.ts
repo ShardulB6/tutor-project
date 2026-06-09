@@ -22,3 +22,16 @@ export const getServerThreads = createServerFn({ method: "GET" })
       .groupBy(SessionMessagesTable.sessionID)
       .orderBy(desc(latestUpdate));
   });
+
+export const deleteServerThread = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      notebookId: z.string().brand<"NotebookId">(),
+      sessionId: z.string(),
+    }),
+  )
+  .handler(async ({ data }) => {
+    await ensureNotebook(data.notebookId);
+
+    await db.delete();
+  });

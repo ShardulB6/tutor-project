@@ -1,4 +1,5 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+import { PlusIcon } from "lucide-react";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "#/components/ui/sidebar";
 import {
   Sidebar,
@@ -7,6 +8,9 @@ import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import type { NotebookId } from "#/db/schema";
 import { getServerNotebook } from "#/lib/functions/notebooks.functions";
@@ -56,6 +60,16 @@ export function AppSidebar({ notebook, notebookID, threads }: ChatSidebarProps) 
         <div>
           <h3 style={{ margin: 0 }}>{notebook.title}</h3>
         </div>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild variant="outline">
+              <Link params={{ notebookID }} to="/$notebookID">
+                <PlusIcon />
+                <span>New Chat</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
