@@ -6,7 +6,7 @@ import type {
   SessionProvider,
   StoredCompaction,
 } from "agents/experimental/memory/session";
-import { SessionCompactionsTable, SessionMessagesTable } from "#/db/schema";
+import { ChatSessionsTable, SessionCompactionsTable, SessionMessagesTable } from "#/db/schema";
 import type { NotebookId } from "#/db/schema";
 import type { db } from "#/db";
 
@@ -32,6 +32,13 @@ export class D1SessionProvider implements SessionProvider {
     sessionId: string,
   ): Promise<D1SessionProvider> {
     const provider = new D1SessionProvider(database, notebookId, sessionId);
+    await database
+      .insert(ChatSessionsTable)
+      .values({
+        notebookID: notebookId,
+        sessionID: sessionId,
+      })
+      .onConflictDoNothing();
     await provider.hydrate();
     return provider;
   }
@@ -122,7 +129,7 @@ export class D1SessionProvider implements SessionProvider {
         .insert(SessionMessagesTable)
         .values(row)
         .onConflictDoNothing()
-        .then(() => undefined),
+        .then(() => this.touchSession()),
     );
   }
 
@@ -155,7 +162,7 @@ export class D1SessionProvider implements SessionProvider {
             eq(SessionMessagesTable.id, row.id),
           ),
         )
-        .then(() => undefined),
+        .then(() => this.touchSession()),
     );
   }
 
@@ -298,6 +305,18 @@ export class D1SessionProvider implements SessionProvider {
     for (const row of compactionRows) {
       this.compactions.set(row.id, row);
     }
+  }
+
+  private async touchSession(): Promise<void> {
+    await this.database
+      .update(ChatSessionsTable)
+      .set({ updatedAt: new Date() })
+      .where(
+        and(
+          eq(ChatSessionsTable.notebookID, this.notebookId),
+          eq(ChatSessionsTable.sessionID, this.sessionId),
+        ),
+      );
   }
 
   private findLatestLeaf(): SessionMessageRow | undefined {
