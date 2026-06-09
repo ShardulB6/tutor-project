@@ -37,6 +37,11 @@ export const notebookRelations = relations(NotebooksTable, ({ one, many }) => ({
   sessionMessages: many(SessionMessagesTable),
 }));
 
+export const ChatSessionsTable = sqliteTable("chat_sessions", {
+  sessionID: text("session_id").primaryKey(),
+  name: text("name").notNull(),
+});
+
 export const SessionMessagesTable = sqliteTable(
   "assistant_messages",
   {
