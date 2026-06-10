@@ -1,11 +1,11 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "f5e6e2f9-fd3c-4dbc-a03b-d8ef85c0d463",
+  "id": "1f2bf5c6-4be5-430c-8a9b-f1021c5c05ff",
   "prevId": "91b4e31e-2fb1-445c-8a69-b8f841b4e50a",
   "tables": {
-    "chat_sessions": {
-      "name": "chat_sessions",
+    "chatSessions": {
+      "name": "chatSessions",
       "columns": {
         "session_id": {
           "name": "session_id",
