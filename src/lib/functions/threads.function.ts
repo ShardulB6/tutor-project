@@ -1,7 +1,7 @@
 import { db } from "#/db";
 import { SessionMessagesTable } from "#/db/schema";
 import { createServerFn } from "@tanstack/react-start";
-import { desc, eq, max } from "drizzle-orm";
+import { and, desc, eq, max } from "drizzle-orm";
 import { z } from "zod";
 import { ensureNotebook } from "./ensure.function";
 
@@ -33,5 +33,12 @@ export const deleteServerThread = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     await ensureNotebook(data.notebookId);
 
-    await db.delete();
+    await db
+      .delete(SessionMessagesTable)
+      .where(
+        and(
+          eq(SessionMessagesTable.notebookID, data.notebookId),
+          eq(SessionMessagesTable.sessionID, data.sessionId),
+        ),
+      );
   });
