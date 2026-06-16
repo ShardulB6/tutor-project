@@ -32,7 +32,7 @@ export const deleteServerThread = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     await ensureNotebook(data.notebookId);
-
+    //TODO: Clean up sessions api/agents sdk resources aswell
     await db
       .delete(SessionMessagesTable)
       .where(
