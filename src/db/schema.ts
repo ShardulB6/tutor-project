@@ -7,7 +7,7 @@ export * from "./auth-schema";
 
 export type NotebookId = string & z.$brand<"NotebookId">;
 
-const timestamspColums = {
+const timestampColumns = {
   createdAt: integer("created_at", { mode: "timestamp" })
     .default(sql`(unixepoch())`)
     .notNull(),
@@ -26,7 +26,7 @@ export const NotebooksTable = sqliteTable("notebook", {
   userID: text("userID")
     .references(() => authSchema.user.id)
     .notNull(),
-  ...timestamspColums,
+  ...timestampColumns,
 });
 
 export const notebookRelations = relations(NotebooksTable, ({ one, many }) => ({
