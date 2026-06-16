@@ -7,7 +7,7 @@ export * from "./auth-schema";
 
 export type NotebookId = string & z.$brand<"NotebookId">;
 
-const timestampColumns = {
+export const timestampColumns = {
   createdAt: integer("created_at", { mode: "timestamp" })
     .default(sql`(unixepoch())`)
     .notNull(),
