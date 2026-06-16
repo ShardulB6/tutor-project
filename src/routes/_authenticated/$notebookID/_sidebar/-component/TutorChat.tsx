@@ -1,6 +1,7 @@
 "use client";
 
 import { useAgentChat } from "@cloudflare/ai-chat/react";
+import { useRouter } from "@tanstack/react-router";
 import { useAgent } from "agents/react";
 import { BotIcon } from "lucide-react";
 import {
@@ -25,6 +26,7 @@ type TutorChatProps = {
 };
 
 export function TutorChat({ notebookID, sessionID }: TutorChatProps) {
+  const router = useRouter();
   const agent = useAgent({
     agent: "TutorAgent",
     name: `${notebookID}:${sessionID}`,
@@ -67,16 +69,22 @@ export function TutorChat({ notebookID, sessionID }: TutorChatProps) {
       <div className="mx-auto w-full max-w-3xl px-4 pb-4">
         <PromptInput
           className="rounded-xl bg-background shadow-sm"
-          onSubmit={({ text }) => {
+          onSubmit={async ({ text }) => {
             const trimmedText = text.trim();
             if (!trimmedText || isBusy) {
               return;
             }
 
-            void sendMessage({
+            const isNewThread = messages.length === 0;
+
+            await sendMessage({
               role: "user",
               parts: [{ type: "text", text: trimmedText }],
             });
+
+            if (isNewThread) {
+              await router.invalidate();
+            }
           }}
         >
           <PromptInputBody>
