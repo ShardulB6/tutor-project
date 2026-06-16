@@ -5,7 +5,7 @@ config({ path: [".env.local", ".env"] });
 
 export default defineConfig({
   out: "./drizzle",
-  schema: "./src/db/schema.ts",
+  schema: ["./src/db/schema.ts", "./src/db/file-schema.ts"],
   dialect: "sqlite",
   driver: "d1-http",
   dbCredentials: {

@@ -1,7 +1,7 @@
 import { Think, Session } from "@cloudflare/think";
 import { gateway } from "ai";
 import { drizzle } from "drizzle-orm/d1";
-import * as schema from "#/db/schema";
+import { dbSchema } from "#/db/db-schema";
 import type { NotebookId } from "#/db/schema";
 import { D1SessionProvider } from "#/lib/sessions/d1-session-provider";
 
@@ -18,7 +18,7 @@ export class TutorAgent extends Think<Cloudflare.Env> {
 
   override async configureSession(_session: Session): Promise<Session> {
     const { notebookId, sessionId } = parseAgentName(this.name);
-    const database = drizzle(this.env.DB, { schema });
+    const database = drizzle(this.env.DB, { schema: dbSchema });
     const provider = await D1SessionProvider.create(database, notebookId, sessionId);
 
     return Session.create(provider).forSession(sessionId);
