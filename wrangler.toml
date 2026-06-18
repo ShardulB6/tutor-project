@@ -18,6 +18,10 @@ database_name = "tutor-db"
 database_id = "fee051e5-6124-44f2-8fa1-aef1db0aba96"
 migrations_dir = "drizzle"
 
+[[r2_buckets]]
+binding = "TUTOR_BUCKET"
+bucket_name = "tutor-project-bucket"
+
 [observability]
 [observability.logs]
 enabled = true
