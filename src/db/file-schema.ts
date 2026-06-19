@@ -1,17 +1,6 @@
-import { relations, sql } from "drizzle-orm";
-import { sqliteTable, integer, text, index, primaryKey } from "drizzle-orm/sqlite-core";
-import crypto from "node:crypto";
+import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
 import * as authSchema from "./auth-schema";
-import { z } from "zod";
-import {
-  timestampColumns,
-  NotebooksTable,
-  notebookRelations,
-  ChatSessionsTable,
-  SessionMessagesTable,
-  sessionMessagesRelations,
-  SessionCompactionsTable,
-} from "./schema";
+import { timestampColumns, NotebooksTable } from "./schema";
 export * from "./auth-schema";
 
 export const files = sqliteTable("files", {
