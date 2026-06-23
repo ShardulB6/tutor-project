@@ -13,7 +13,7 @@ export const files = sqliteTable("files", {
     .references(() => authSchema.user.id)
     .notNull(),
   size: integer("size"),
-  data: text(),
+  contentType: text("content_type"),
   storageKey: text("storage_key"),
 
   ...timestampColumns,
