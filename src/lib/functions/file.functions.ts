@@ -1,7 +1,7 @@
 import { db } from "#/db";
 import { files } from "#/db/file-schema";
 import { createServerFn } from "@tanstack/react-start";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { env } from "cloudflare:workers";
 import crypto from "node:crypto";
 import { z } from "zod";
@@ -67,4 +67,29 @@ export const deleteFile = createServerFn({ method: "POST" })
       .where(and(eq(files.id, data.fileId), eq(files.notebookID, data.notebookId)));
 
     return { success: true };
+  });
+
+export const getFiles = createServerFn({ method: "GET" })
+  .inputValidator(
+    z.object({
+      notebookId: z.string().brand<"NotebookId">(),
+    }),
+  )
+  .handler(async ({ data }) => {
+    await ensureNotebook(data.notebookId);
+
+    return db
+      .select({
+        id: files.id,
+        title: files.title,
+        notebookID: files.notebookID,
+        size: files.size,
+        contentType: files.contentType,
+        storageKey: files.storageKey,
+        createdAt: files.createdAt,
+        updatedAt: files.updatedAt,
+      })
+      .from(files)
+      .where(eq(files.notebookID, data.notebookId))
+      .orderBy(desc(files.createdAt));
   });
