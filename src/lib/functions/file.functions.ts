@@ -7,46 +7,25 @@ import crypto from "node:crypto";
 import { z } from "zod";
 import { ensureNotebook } from "./ensure.function";
 
-const fileDataUrlPattern = /^data:([^;,]+)?(?:;[^,]*)?;base64,(.*)$/;
-
-const saveFileSchema = z
-  .object({
-    notebookId: z.string().brand<"NotebookId">(),
-    title: z.string().min(1),
-    size: z.number().int().nonnegative().optional(),
-    contentType: z.string().min(1).optional(),
-    data: z.string().min(1),
-  })
-  .strip();
-
-function decodeFileData(data: string) {
-  const match = fileDataUrlPattern.exec(data);
-  const contentType = match?.[1];
-  const payload = match?.[2] ?? data;
-
-  return {
-    contentType,
-    bytes: Buffer.from(payload, "base64"),
-  };
-}
-
-export const saveServerFile = createServerFn({ method: "POST" })
-  .inputValidator(saveFileSchema)
+export const saveFileSchema = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      title: z.string(),
+      notebookId: z.string().brand<"NotebookId">(),
+      size: z.number(),
+      data: z.string(),
+      contentType: z.string(),
+    }),
+  )
   .handler(async ({ data }) => {
     const notebook = await ensureNotebook(data.notebookId);
-    const id = crypto.randomUUID();
-    const storageKey = `users/${notebook.userID}/notebooks/${data.notebookId}/files/${id}`;
-    const fileData = decodeFileData(data.data);
-    const contentType = data.contentType ?? fileData.contentType ?? "application/octet-stream";
 
-    await env.TUTOR_BUCKET.put(storageKey, fileData.bytes, {
+    const id = crypto.randomUUID();
+    const storageKey = "${notebook.userID}/${data.notebookId}/${id}/${data.title}";
+
+    await env.TUTOR_BUCKET.put(storageKey, data.data, {
       httpMetadata: {
-        contentType,
-      },
-      customMetadata: {
-        fileId: id,
-        notebookId: data.notebookId,
-        userId: notebook.userID,
+        contentType: data.contentType,
       },
     });
 
@@ -56,14 +35,14 @@ export const saveServerFile = createServerFn({ method: "POST" })
       notebookID: data.notebookId,
       userID: notebook.userID,
       size: data.size,
-      contentType,
+      contentType: data.contentType,
       storageKey,
     });
 
-    return { id, storageKey, success: true };
+    return { id, storageKey };
   });
 
-export const deleteServerFile = createServerFn({ method: "POST" })
+export const deleteFile = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({
       notebookId: z.string().brand<"NotebookId">(),
@@ -71,32 +50,21 @@ export const deleteServerFile = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
-    const notebook = await ensureNotebook(data.notebookId);
-    const [file] = await db
-      .select({ storageKey: files.storageKey })
-      .from(files)
-      .where(
-        and(
-          eq(files.id, data.fileId),
-          eq(files.notebookID, data.notebookId),
-          eq(files.userID, notebook.userID),
-        ),
-      )
-      .limit(1);
+    await ensureNotebook(data.notebookId);
+    const file = await db.query.files.findFirst({
+      where: (files) => and(eq(files.id, data.fileId), eq(files.notebookID, data.notebookId)),
+    });
+    if (!file) {
+      throw new Error("File not found");
+    }
+
+    if (file.storageKey) {
+      await env.TUTOR_BUCKET.delete(file.storageKey);
+    }
 
     await db
       .delete(files)
-      .where(
-        and(
-          eq(files.id, data.fileId),
-          eq(files.notebookID, data.notebookId),
-          eq(files.userID, notebook.userID),
-        ),
-      );
-
-    if (file?.storageKey) {
-      await env.TUTOR_BUCKET.delete(file.storageKey);
-    }
+      .where(and(eq(files.id, data.fileId), eq(files.notebookID, data.notebookId)));
 
     return { success: true };
   });
