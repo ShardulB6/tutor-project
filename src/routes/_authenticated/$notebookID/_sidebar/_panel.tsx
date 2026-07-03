@@ -1,7 +1,14 @@
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "#/components/ui/resizable";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { saveFileSchema, getFiles, deleteFile } from "#/lib/functions/file.functions";
 
 export const Route = createFileRoute("/_authenticated/$notebookID/_sidebar/_panel")({
+  loader: async ({ params }) => {
+    const files = await getFiles({ data: { notebookId: params.notebookID } });
+
+    return { files };
+  },
+
   component: RouteComponent,
 });
 
