@@ -21,7 +21,7 @@ export const saveFileSchema = createServerFn({ method: "POST" })
     const notebook = await ensureNotebook(data.notebookId);
 
     const id = crypto.randomUUID();
-    const storageKey = "${notebook.userID}/${data.notebookId}/${id}/${data.title}";
+    const storageKey = `${notebook.userID}/${data.notebookId}/${id}/${data.title}`;
 
     await env.TUTOR_BUCKET.put(storageKey, data.data, {
       httpMetadata: {
