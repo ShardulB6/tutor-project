@@ -75,7 +75,7 @@ export function NotebookCard({
   const router = useRouter();
   const deleteNotebook = useServerFn(deleteServerNotebook);
   return (
-    <Card className="relative mx-auto w-full max-w-sm border-0 pt-0 shadow-none ">
+    <Card className="relative max-w-sm border-0 pt-0 shadow-none ">
       <div className="absolute inset-0 z-30 aspect-video bg-black/35" />
       <img
         src={"https://avatar.vercel.sh/shadcn1"}
