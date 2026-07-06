@@ -53,7 +53,7 @@ function RouteComponent() {
           <div className="min-h-0 flex-1 overflow-y-auto">
             <ul className="space-y-1 pb-4">
               {files.map((file) => (
-                <li className="break-words" key={file.id}>
+                <li className="wrap-break-word p-2" key={file.id}>
                   {file.title}
                 </li>
               ))}
