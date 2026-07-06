@@ -40,18 +40,22 @@ function RouteComponent() {
   return (
     <ResizablePanelGroup orientation="horizontal">
       <ResizablePanel defaultSize="20%" minSize="10%">
-        <div className="flex h-24 w-full flex-col items-center justify-center gap-3 px-4">
-          <span className="font-semibold">Files</span>
-          <input
-            type="file"
-            accept=".pdf"
-            className="block w-full max-w-40 text-sm"
-            onChange={handleFileUpload}
-          />
-          <div>
-            <ul>
+        <div className="flex h-full min-h-0 w-full flex-col px-4">
+          <div className="flex shrink-0 flex-col items-center gap-3 py-4">
+            <span className="font-semibold">Files</span>
+            <input
+              type="file"
+              accept=".pdf"
+              className="block w-full max-w-40 text-sm"
+              onChange={handleFileUpload}
+            />
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <ul className="space-y-1 pb-4">
               {files.map((file) => (
-                <li key={file.id}>{file.title}</li>
+                <li className="break-words" key={file.id}>
+                  {file.title}
+                </li>
               ))}
             </ul>
           </div>
