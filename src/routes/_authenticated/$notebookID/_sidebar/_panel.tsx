@@ -1,6 +1,6 @@
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "#/components/ui/resizable";
-import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { saveFileSchema, getFiles, deleteFile } from "#/lib/functions/file.functions";
+import { getFiles, saveFileSchema } from "#/lib/functions/file.functions";
+import { createFileRoute, Outlet, useRouter } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/$notebookID/_sidebar/_panel")({
   loader: async ({ params }) => {
@@ -14,8 +14,28 @@ export const Route = createFileRoute("/_authenticated/$notebookID/_sidebar/_pane
 
 function RouteComponent() {
   const { files } = Route.useLoaderData();
+  const { notebookID } = Route.useParams();
+  const router = useRouter();
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {};
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("notebookId", notebookID);
+
+    try {
+      await saveFileSchema({ data: formData });
+      await router.invalidate();
+    } finally {
+      input.value = "";
+    }
+  };
 
   return (
     <ResizablePanelGroup orientation="horizontal">
@@ -31,7 +51,7 @@ function RouteComponent() {
           <div>
             <ul>
               {files.map((file) => (
-                <li key={file.id}>{file.id}</li>
+                <li key={file.id}>{file.title}</li>
               ))}
             </ul>
           </div>

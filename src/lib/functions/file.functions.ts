@@ -8,36 +8,56 @@ import { z } from "zod";
 import { ensureNotebook } from "./ensure.function";
 
 export const saveFileSchema = createServerFn({ method: "POST" })
-  .inputValidator(
-    z.object({
-      title: z.string(),
-      notebookId: z.string().brand<"NotebookId">(),
-      size: z.number(),
-      data: z.string(),
-      contentType: z.string(),
-    }),
-  )
+  .inputValidator((data) => {
+    if (!(data instanceof FormData)) {
+      throw new Error("Expected form data");
+    }
+
+    const file = data.get("file");
+    const notebookId = data.get("notebookId");
+
+    if (!(file instanceof File)) {
+      throw new Error("A file is required");
+    }
+    if (typeof notebookId !== "string" || !notebookId) {
+      throw new Error("A notebook ID is required");
+    }
+    if (file.type !== "application/pdf") {
+      throw new Error("Only PDF files are supported");
+    }
+
+    return {
+      file,
+      notebookId: z.string().brand<"NotebookId">().parse(notebookId),
+    };
+  })
   .handler(async ({ data }) => {
     const notebook = await ensureNotebook(data.notebookId);
 
     const id = crypto.randomUUID();
-    const storageKey = `${notebook.userID}/${data.notebookId}/${id}/${data.title}`;
+    const storageKey = `${notebook.userID}/${data.notebookId}/${id}`;
 
-    await env.TUTOR_BUCKET.put(storageKey, data.data, {
+    await env.TUTOR_BUCKET.put(storageKey, data.file, {
       httpMetadata: {
-        contentType: data.contentType,
+        contentType: data.file.type,
+        contentDisposition: `attachment; filename="${data.file.name.replaceAll('"', "")}"`,
       },
     });
 
-    await db.insert(files).values({
-      id,
-      title: data.title,
-      notebookID: data.notebookId,
-      userID: notebook.userID,
-      size: data.size,
-      contentType: data.contentType,
-      storageKey,
-    });
+    try {
+      await db.insert(files).values({
+        id,
+        title: data.file.name,
+        notebookID: data.notebookId,
+        userID: notebook.userID,
+        size: data.file.size,
+        contentType: data.file.type,
+        storageKey,
+      });
+    } catch (error) {
+      await env.TUTOR_BUCKET.delete(storageKey);
+      throw error;
+    }
 
     return { id, storageKey };
   });
