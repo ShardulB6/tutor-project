@@ -67,7 +67,7 @@ export function AppSidebar({ notebook, notebookID, threads }: ChatSidebarProps) 
         </div>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild variant="outline">
+            <SidebarMenuButton asChild>
               <Link params={{ notebookID }} reloadDocument to="/$notebookID">
                 <PlusIcon />
                 <span>New Chat</span>
