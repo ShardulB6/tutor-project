@@ -17,6 +17,7 @@ import type { NotebookId } from "#/db/schema";
 import { getServerNotebook } from "#/lib/functions/notebooks.functions";
 import { deleteServerThread, getServerThreads } from "#/lib/functions/threads.function";
 import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useState } from "react";
 import z from "zod";
 
 export const Route = createFileRoute("/_authenticated/$notebookID/_sidebar")({
@@ -58,6 +59,11 @@ type ChatSidebarProps = {
 export function AppSidebar({ notebook, notebookID, threads }: ChatSidebarProps) {
   const router = useRouter();
   const deleteThread = useServerFn(deleteServerThread);
+  const [visibleThreads, setVisibleThreads] = useState(threads);
+
+  useEffect(() => {
+    setVisibleThreads(threads);
+  }, [threads]);
 
   return (
     <Sidebar>
@@ -80,7 +86,7 @@ export function AppSidebar({ notebook, notebookID, threads }: ChatSidebarProps) 
         <SidebarGroup>
           <SidebarGroupLabel>Threads</SidebarGroupLabel>
           <div className="space-y-1">
-            {threads.map((thread: any) => (
+            {visibleThreads.map((thread: any) => (
               <div
                 className="flex items-center gap-2 rounded-md px-1 py-0.5 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 key={thread.sessionID}
@@ -100,9 +106,9 @@ export function AppSidebar({ notebook, notebookID, threads }: ChatSidebarProps) 
                   size="icon-xs"
                   variant="ghost"
                   onClick={async () => {
-                    const isCurrentThread = window.location.pathname.endsWith(
-                      `/${thread.sessionID}`,
-                    );
+                    const currentPath = window.location.pathname.replace(/\/$/, "");
+                    const threadPath = `/${notebookID}/${thread.sessionID}`;
+                    const isCurrentThread = currentPath === threadPath;
 
                     await deleteThread({
                       data: {
@@ -110,15 +116,24 @@ export function AppSidebar({ notebook, notebookID, threads }: ChatSidebarProps) 
                         sessionId: thread.sessionID,
                       },
                     });
+                    setVisibleThreads((currentThreads: any) =>
+                      currentThreads.filter(
+                        (currentThread: any) => currentThread.sessionID !== thread.sessionID,
+                      ),
+                    );
 
                     if (isCurrentThread) {
                       await router.navigate({
-                        params: { notebookID },
-                        to: "/$notebookID",
+                        params: {
+                          notebookID,
+                          chatID: crypto.randomUUID(),
+                        },
+                        replace: true,
+                        to: "/$notebookID/$chatID",
                       });
                     }
 
-                    await router.load();
+                    await router.invalidate();
                   }}
                   title="Delete thread"
                 >
