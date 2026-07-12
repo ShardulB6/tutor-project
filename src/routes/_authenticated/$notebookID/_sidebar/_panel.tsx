@@ -39,12 +39,8 @@ function RouteComponent() {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("notebookId", notebookID);
-
     try {
-      await saveFileSchema({ data: formData });
+      await saveFileSchema({ data: { file, notebookId: notebookID } });
       await router.invalidate();
     } finally {
       input.value = "";
