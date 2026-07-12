@@ -8,6 +8,8 @@ import { D1SessionProvider } from "#/lib/sessions/d1-session-provider";
 const DEFAULT_MODEL = "openai/gpt-oss-120b";
 
 export class TutorAgent extends Think<Cloudflare.Env> {
+  workspaceBash = false;
+
   getModel() {
     return gateway(DEFAULT_MODEL);
   }
