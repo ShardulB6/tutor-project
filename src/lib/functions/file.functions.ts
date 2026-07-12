@@ -8,29 +8,12 @@ import { z } from "zod";
 import { ensureNotebook } from "./ensure.function";
 
 export const saveFileSchema = createServerFn({ method: "POST" })
-  .inputValidator((data) => {
-    if (!(data instanceof FormData)) {
-      throw new Error("Expected form data");
-    }
-
-    const file = data.get("file");
-    const notebookId = data.get("notebookId");
-
-    if (!(file instanceof File)) {
-      throw new Error("A file is required");
-    }
-    if (typeof notebookId !== "string" || !notebookId) {
-      throw new Error("A notebook ID is required");
-    }
-    if (file.type !== "application/pdf") {
-      throw new Error("Only PDF files are supported");
-    }
-
-    return {
-      file,
-      notebookId: z.string().brand<"NotebookId">().parse(notebookId),
-    };
-  })
+  .inputValidator(
+    z.object({
+      file: z.file().mime("application/pdf"),
+      notebookId: z.string().brand<"NotebookId">(),
+    }),
+  )
   .handler(async ({ data }) => {
     const notebook = await ensureNotebook(data.notebookId);
 
