@@ -2,7 +2,7 @@ import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
 import * as authSchema from "./auth-schema";
 import { timestampColumns, NotebooksTable } from "./schema";
 export * from "./auth-schema";
-
+// TODO add
 export const files = sqliteTable("files", {
   title: text().notNull(),
   id: text("id").notNull(),
