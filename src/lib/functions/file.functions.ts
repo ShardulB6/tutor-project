@@ -8,11 +8,16 @@ import { z } from "zod";
 import { ensureNotebook } from "./ensure.function";
 // TODO add branding
 export const saveFileSchema = createServerFn({ method: "POST" })
-  .inputValidator(
-    z.object({
+  .inputValidator((formData: FormData) =>
+    z
+      .object({
       file: z.file().mime("application/pdf"),
       notebookId: z.string().brand<"NotebookId">(),
-    }),
+      })
+      .parse({
+        file: formData.get("file"),
+        notebookId: formData.get("notebookId"),
+      }),
   )
   .handler(async ({ data }) => {
     const notebook = await ensureNotebook(data.notebookId);

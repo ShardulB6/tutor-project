@@ -40,8 +40,8 @@ function RouteComponent() {
     }
 
     const formData = new FormData();
-    formData.append("file", file);
-    formData.append("notebookId", notebookID);
+    formData.set("file", file);
+    formData.set("notebookId", notebookID);
 
     try {
       await saveFileSchema({ data: formData });
