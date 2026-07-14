@@ -11,8 +11,8 @@ export const saveFileSchema = createServerFn({ method: "POST" })
   .inputValidator((formData: FormData) =>
     z
       .object({
-      file: z.file().mime("application/pdf"),
-      notebookId: z.string().brand<"NotebookId">(),
+        file: z.file().mime("application/pdf"),
+        notebookId: z.string().brand<"NotebookId">(),
       })
       .parse({
         file: formData.get("file"),
