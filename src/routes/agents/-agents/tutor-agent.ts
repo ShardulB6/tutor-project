@@ -4,6 +4,7 @@ import { drizzle } from "drizzle-orm/d1";
 import { dbSchema } from "#/db/db-schema";
 import type { NotebookId } from "#/db/schema";
 import { D1SessionProvider } from "#/lib/sessions/d1-session-provider";
+import { createReadNotebookFileTool } from "./tools/read-notebook-file";
 
 const DEFAULT_MODEL = "openai/gpt-oss-120b";
 
@@ -16,6 +17,14 @@ export class TutorAgent extends Think<Cloudflare.Env> {
 
   getSystemPrompt() {
     return "You are a focused tutor. Explain concepts clearly, ask useful follow-up questions, and adapt answers to the student's notebook context.";
+  }
+
+  override getTools() {
+    const { notebookId } = parseAgentName(this.name);
+
+    return {
+      readNotebookFile: createReadNotebookFileTool({ env: this.env, notebookId }),
+    };
   }
 
   override async configureSession(_session: Session): Promise<Session> {
