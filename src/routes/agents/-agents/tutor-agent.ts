@@ -16,7 +16,8 @@ export class TutorAgent extends Think<Cloudflare.Env> {
   }
 
   getSystemPrompt() {
-    return "You are a focused tutor. Explain concepts clearly, ask useful follow-up questions, and adapt answers to the student's notebook context.";
+    return `You are a focused tutor. Explain concepts clearly, 
+    ask useful follow-up questions, and adapt answers to the student's notebook context.`;
   }
 
   override getTools() {
