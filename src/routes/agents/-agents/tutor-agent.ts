@@ -7,7 +7,7 @@ import { D1SessionProvider } from "#/lib/sessions/d1-session-provider";
 import { createListNotebookFilesTool } from "./tools/list-notebook-files";
 import { createReadNotebookFileTool } from "./tools/read-notebook-file";
 
-const DEFAULT_MODEL = "openai/gpt-3.5-turbo";
+const DEFAULT_MODEL = "openai/gpt-4o-mini";
 
 export class TutorAgent extends Think<Cloudflare.Env> {
   workspaceBash = false;
