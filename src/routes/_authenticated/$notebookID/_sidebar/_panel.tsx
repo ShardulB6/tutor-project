@@ -1,7 +1,6 @@
 import { Button } from "#/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "#/components/ui/resizable";
 import { deleteFile, getFiles, saveFileSchema } from "#/lib/functions/file.functions";
-import { cn } from "#/lib/utils";
 import { createFileRoute, Outlet, useRouter } from "@tanstack/react-router";
 import { Trash2Icon } from "lucide-react";
 import { useState } from "react";
@@ -20,16 +19,7 @@ function RouteComponent() {
   const { files } = Route.useLoaderData();
   const { notebookID } = Route.useParams();
   const router = useRouter();
-  const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
   const [deletingFileIds, setDeletingFileIds] = useState<string[]>([]);
-
-  const toggleFileSelection = (fileId: string) => {
-    setSelectedFileIds((currentFileIds) =>
-      currentFileIds.includes(fileId)
-        ? currentFileIds.filter((currentFileId) => currentFileId !== fileId)
-        : [...currentFileIds, fileId],
-    );
-  };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const input = event.currentTarget;
@@ -56,9 +46,6 @@ function RouteComponent() {
 
     try {
       await deleteFile({ data: { notebookId: notebookID, fileId } });
-      setSelectedFileIds((currentFileIds) =>
-        currentFileIds.filter((currentFileId) => currentFileId !== fileId),
-      );
       await router.invalidate();
     } finally {
       setDeletingFileIds((currentFileIds) =>
@@ -83,21 +70,8 @@ function RouteComponent() {
           <ul className="min-h-0 flex-1 overflow-y-auto">
             {files.map((file) => (
               <li key={file.id}>
-                <div
-                  className={cn(
-                    "flex items-start gap-2 rounded-md p-2 text-sm",
-                    selectedFileIds.includes(file.id) && "bg-accent text-accent-foreground",
-                  )}
-                >
-                  <label className="flex min-w-0 flex-1 cursor-pointer items-start gap-2">
-                    <input
-                      checked={selectedFileIds.includes(file.id)}
-                      className="mt-1"
-                      onChange={() => toggleFileSelection(file.id)}
-                      type="checkbox"
-                    />
-                    <span className="wrap-break-word min-w-0 flex-1">{file.title}</span>
-                  </label>
+                <div className="flex items-start gap-2 rounded-md p-2 text-sm">
+                  <span className="wrap-break-word min-w-0 flex-1">{file.title}</span>
                   <Button
                     aria-label="Delete file"
                     disabled={deletingFileIds.includes(file.id)}
