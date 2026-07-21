@@ -1,19 +1,26 @@
-import { Think, Session } from "@cloudflare/think";
+import { Think, Session, type TurnContext } from "@cloudflare/think";
 import { gateway } from "ai";
 import { drizzle } from "drizzle-orm/d1";
 import { dbSchema } from "#/db/db-schema";
 import type { NotebookId } from "#/db/schema";
+import { DEFAULT_TUTOR_MODEL, isTutorModelId } from "#/lib/models";
 import { D1SessionProvider } from "#/lib/sessions/d1-session-provider";
 import { createListNotebookFilesTool } from "./tools/list-notebook-files";
 import { createReadNotebookFileTool } from "./tools/read-notebook-file";
-
-const DEFAULT_MODEL = "openai/gpt-4o-mini";
 
 export class TutorAgent extends Think<Cloudflare.Env> {
   workspaceBash = false;
 
   getModel() {
-    return gateway(DEFAULT_MODEL);
+    return gateway(DEFAULT_TUTOR_MODEL);
+  }
+
+  override beforeTurn({ body }: TurnContext) {
+    const modelId = body?.model;
+
+    if (isTutorModelId(modelId)) {
+      return { model: gateway(modelId) };
+    }
   }
 
   getSystemPrompt() {

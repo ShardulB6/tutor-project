@@ -3,7 +3,8 @@
 import { useAgentChat } from "@cloudflare/ai-chat/react";
 import { useRouter } from "@tanstack/react-router";
 import { useAgent } from "agents/react";
-import { BotIcon } from "lucide-react";
+import { BotIcon, CheckIcon, ChevronDownIcon } from "lucide-react";
+import { useState } from "react";
 import {
   Conversation,
   ConversationContent,
@@ -12,12 +13,26 @@ import {
 } from "#/components/ai-elements/conversation";
 import { Message, MessageContent, MessageResponse } from "#/components/ai-elements/message";
 import {
+  ModelSelector,
+  ModelSelectorContent,
+  ModelSelectorEmpty,
+  ModelSelectorGroup,
+  ModelSelectorInput,
+  ModelSelectorItem,
+  ModelSelectorList,
+  ModelSelectorLogo,
+  ModelSelectorName,
+  ModelSelectorTrigger,
+} from "#/components/ai-elements/model-selector";
+import {
   PromptInput,
   PromptInputBody,
+  PromptInputButton,
   PromptInputFooter,
   PromptInputSubmit,
   PromptInputTextarea,
 } from "#/components/ai-elements/prompt-input";
+import { DEFAULT_TUTOR_MODEL, TUTOR_MODELS, type TutorModelId } from "#/lib/models";
 import { cn } from "#/lib/utils";
 
 type TutorChatProps = {
@@ -27,12 +42,20 @@ type TutorChatProps = {
 
 export function TutorChat({ notebookID, sessionID }: TutorChatProps) {
   const router = useRouter();
+  const [isModelSelectorOpen, setIsModelSelectorOpen] = useState(false);
+  const [selectedModelId, setSelectedModelId] = useState<TutorModelId>(DEFAULT_TUTOR_MODEL);
   const agent = useAgent({
     agent: "TutorAgent",
     name: `${notebookID}:${sessionID}`,
   });
-  const { messages, sendMessage, status, stop } = useAgentChat({ agent });
+  const { messages, sendMessage, status, stop } = useAgentChat({
+    agent,
+    body: () => ({ model: selectedModelId }),
+  });
   const isBusy = status === "submitted" || status === "streaming";
+  const selectedModel =
+    TUTOR_MODELS.find((model) => model.id === selectedModelId) ?? TUTOR_MODELS[0];
+  const providers = [...new Set(TUTOR_MODELS.map((model) => model.provider))];
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -95,14 +118,60 @@ export function TutorChat({ notebookID, sessionID }: TutorChatProps) {
             />
           </PromptInputBody>
           <PromptInputFooter>
-            <span
-              className={cn(
-                "px-2 text-xs text-muted-foreground",
-                status === "error" && "text-destructive",
-              )}
-            >
-              {status === "error" ? "Message failed. Try again." : "Enter to send"}
-            </span>
+            <div className="flex min-w-0 items-center gap-1">
+              <ModelSelector onOpenChange={setIsModelSelectorOpen} open={isModelSelectorOpen}>
+                <ModelSelectorTrigger asChild>
+                  <PromptInputButton
+                    aria-label={`Select model. Current model: ${selectedModel.name}`}
+                    className="max-w-40"
+                    disabled={isBusy}
+                  >
+                    <ModelSelectorLogo provider={selectedModel.id.split("/")[0]} />
+                    <span className="truncate">{selectedModel.name}</span>
+                    <ChevronDownIcon className="size-3" />
+                  </PromptInputButton>
+                </ModelSelectorTrigger>
+                <ModelSelectorContent title="Select a tutor model">
+                  <ModelSelectorInput placeholder="Search models..." />
+                  <ModelSelectorList>
+                    <ModelSelectorEmpty>No models found.</ModelSelectorEmpty>
+                    {providers.map((provider) => (
+                      <ModelSelectorGroup heading={provider} key={provider}>
+                        {TUTOR_MODELS.filter((model) => model.provider === provider).map(
+                          (model) => (
+                            <ModelSelectorItem
+                              key={model.id}
+                              onSelect={() => {
+                                setSelectedModelId(model.id);
+                                setIsModelSelectorOpen(false);
+                              }}
+                              value={`${model.provider} ${model.name} ${model.id}`}
+                            >
+                              <ModelSelectorLogo provider={model.id.split("/")[0]} />
+                              <ModelSelectorName>{model.name}</ModelSelectorName>
+                              <CheckIcon
+                                className={cn(
+                                  "size-4",
+                                  model.id === selectedModelId ? "opacity-100" : "opacity-0",
+                                )}
+                              />
+                            </ModelSelectorItem>
+                          ),
+                        )}
+                      </ModelSelectorGroup>
+                    ))}
+                  </ModelSelectorList>
+                </ModelSelectorContent>
+              </ModelSelector>
+              <span
+                className={cn(
+                  "hidden px-2 text-xs text-muted-foreground sm:inline",
+                  status === "error" && "text-destructive",
+                )}
+              >
+                {status === "error" ? "Message failed. Try again." : "Enter to send"}
+              </span>
+            </div>
             <PromptInputSubmit onStop={stop} status={status} />
           </PromptInputFooter>
         </PromptInput>
