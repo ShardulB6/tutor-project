@@ -1,7 +1,8 @@
 import { createFileRoute, Link, Outlet, useRouter } from "@tanstack/react-router";
-import { PlusIcon, Trash2Icon } from "lucide-react";
+import { CheckIcon, PencilIcon, PlusIcon, Trash2Icon, XIcon } from "lucide-react";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "#/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Sidebar,
   SidebarContent,
@@ -15,9 +16,13 @@ import {
 } from "@/components/ui/sidebar";
 import type { NotebookId } from "#/db/schema";
 import { getServerNotebook } from "#/lib/functions/notebooks.functions";
-import { deleteServerThread, getServerThreads } from "#/lib/functions/threads.function";
+import {
+  deleteServerThread,
+  getServerThreads,
+  renameServerThread,
+} from "#/lib/functions/threads.function";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import z from "zod";
 
 export const Route = createFileRoute("/_authenticated/$notebookID/_sidebar")({
@@ -51,25 +56,66 @@ function RouteComponent() {
 }
 
 type ChatSidebarProps = {
-  notebook: any; // Replace 'any' with the actual type for your notebook object
+  notebook: Awaited<ReturnType<typeof getServerNotebook>>;
   notebookID: NotebookId;
-  threads: any; // Replace 'any' with the actual type for your threads object
+  threads: Awaited<ReturnType<typeof getServerThreads>>;
 };
 
 export function AppSidebar({ notebook, notebookID, threads }: ChatSidebarProps) {
   const router = useRouter();
   const deleteThread = useServerFn(deleteServerThread);
+  const renameThread = useServerFn(renameServerThread);
   const [visibleThreads, setVisibleThreads] = useState(threads);
+  const [editingThreadID, setEditingThreadID] = useState<string | null>(null);
+  const [draftThreadName, setDraftThreadName] = useState("");
+  const [renamingThreadID, setRenamingThreadID] = useState<string | null>(null);
+  const [renameError, setRenameError] = useState<string | null>(null);
 
   useEffect(() => {
     setVisibleThreads(threads);
   }, [threads]);
 
+  async function handleRename(event: FormEvent<HTMLFormElement>, threadID: string) {
+    event.preventDefault();
+
+    const name = draftThreadName.replace(/\s+/g, " ").trim();
+    if (!name) {
+      setRenameError("Chat name cannot be empty.");
+      return;
+    }
+
+    setRenameError(null);
+    setRenamingThreadID(threadID);
+
+    try {
+      const renamedThread = await renameThread({
+        data: {
+          name,
+          notebookId: notebookID,
+          sessionId: threadID,
+        },
+      });
+
+      setVisibleThreads((currentThreads) =>
+        currentThreads.map((thread) =>
+          thread.sessionID === threadID ? { ...thread, name: renamedThread.name } : thread,
+        ),
+      );
+      setEditingThreadID(null);
+      setDraftThreadName("");
+      await router.invalidate();
+    } catch {
+      setRenameError("Could not rename this chat. Try again.");
+    } finally {
+      setRenamingThreadID(null);
+    }
+  }
+
   return (
     <Sidebar>
       <SidebarHeader>
         <div>
-          <h3 style={{ margin: 0 }}>{notebook.title}</h3>
+          <h3 style={{ margin: 0 }}>{notebook?.title}</h3>
         </div>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -86,59 +132,134 @@ export function AppSidebar({ notebook, notebookID, threads }: ChatSidebarProps) 
         <SidebarGroup>
           <SidebarGroupLabel>Threads</SidebarGroupLabel>
           <div className="space-y-1">
-            {visibleThreads.map((thread: any) => (
-              <div
-                className="flex items-center gap-2 rounded-md px-1 py-0.5 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                key={thread.sessionID}
-              >
-                <Link
-                  activeProps={{ className: "bg-sidebar-accent text-sidebar-accent-foreground" }}
-                  className="min-w-0 flex-1 truncate rounded-md px-2 py-1.5 text-sm"
-                  params={{ notebookID, chatID: thread.sessionID }}
-                  reloadDocument
-                  to="/$notebookID/$chatID"
-                >
-                  {thread.sessionID}
-                </Link>
-                <Button
-                  aria-label={`Delete thread ${thread.sessionID}`}
-                  className="shrink-0"
-                  size="icon-xs"
-                  variant="ghost"
-                  onClick={async () => {
-                    const currentPath = window.location.pathname.replace(/\/$/, "");
-                    const threadPath = `/${notebookID}/${thread.sessionID}`;
-                    const isCurrentThread = currentPath === threadPath;
+            {visibleThreads.map((thread) => (
+              <div className="space-y-1" key={thread.sessionID}>
+                <div className="flex items-center gap-1 rounded-md px-1 py-0.5 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
+                  {editingThreadID === thread.sessionID ? (
+                    <form
+                      className="flex min-w-0 flex-1 items-center gap-1"
+                      onSubmit={(event) => handleRename(event, thread.sessionID)}
+                    >
+                      <Input
+                        aria-invalid={Boolean(renameError)}
+                        aria-label={`Rename chat ${thread.name}`}
+                        autoFocus
+                        className="h-7 min-w-0 flex-1 px-2 text-sm"
+                        disabled={renamingThreadID === thread.sessionID}
+                        maxLength={60}
+                        value={draftThreadName}
+                        onChange={(event) => setDraftThreadName(event.target.value)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Escape") {
+                            setEditingThreadID(null);
+                            setDraftThreadName("");
+                            setRenameError(null);
+                          }
+                        }}
+                      />
+                      <Button
+                        aria-label="Save chat name"
+                        disabled={renamingThreadID === thread.sessionID}
+                        size="icon-xs"
+                        title="Save chat name"
+                        type="submit"
+                        variant="ghost"
+                      >
+                        <CheckIcon />
+                      </Button>
+                      <Button
+                        aria-label="Cancel renaming"
+                        disabled={renamingThreadID === thread.sessionID}
+                        size="icon-xs"
+                        title="Cancel renaming"
+                        type="button"
+                        variant="ghost"
+                        onClick={() => {
+                          setEditingThreadID(null);
+                          setDraftThreadName("");
+                          setRenameError(null);
+                        }}
+                      >
+                        <XIcon />
+                      </Button>
+                    </form>
+                  ) : (
+                    <>
+                      <Link
+                        activeProps={{
+                          className: "bg-sidebar-accent text-sidebar-accent-foreground",
+                        }}
+                        className="min-w-0 flex-1 truncate rounded-md px-2 py-1.5 text-sm"
+                        params={{ notebookID, chatID: thread.sessionID }}
+                        reloadDocument
+                        title={thread.name}
+                        to="/$notebookID/$chatID"
+                      >
+                        {thread.name}
+                      </Link>
+                      <Button
+                        aria-label={`Rename chat ${thread.name}`}
+                        className="shrink-0"
+                        disabled={renamingThreadID !== null}
+                        size="icon-xs"
+                        title="Rename chat"
+                        variant="ghost"
+                        onClick={() => {
+                          setEditingThreadID(thread.sessionID);
+                          setDraftThreadName(thread.name);
+                          setRenameError(null);
+                        }}
+                      >
+                        <PencilIcon />
+                      </Button>
+                      <Button
+                        aria-label={`Delete thread ${thread.name}`}
+                        className="shrink-0"
+                        disabled={renamingThreadID !== null}
+                        size="icon-xs"
+                        title="Delete thread"
+                        variant="ghost"
+                        onClick={async () => {
+                          const currentPath = window.location.pathname.replace(/\/$/, "");
+                          const threadPath = `/${notebookID}/${thread.sessionID}`;
+                          const isCurrentThread = currentPath === threadPath;
 
-                    await deleteThread({
-                      data: {
-                        notebookId: notebookID,
-                        sessionId: thread.sessionID,
-                      },
-                    });
-                    setVisibleThreads((currentThreads: any) =>
-                      currentThreads.filter(
-                        (currentThread: any) => currentThread.sessionID !== thread.sessionID,
-                      ),
-                    );
+                          await deleteThread({
+                            data: {
+                              notebookId: notebookID,
+                              sessionId: thread.sessionID,
+                            },
+                          });
+                          setVisibleThreads((currentThreads) =>
+                            currentThreads.filter(
+                              (currentThread) => currentThread.sessionID !== thread.sessionID,
+                            ),
+                          );
 
-                    if (isCurrentThread) {
-                      await router.navigate({
-                        params: {
-                          notebookID,
-                          chatID: crypto.randomUUID(),
-                        },
-                        replace: true,
-                        to: "/$notebookID/$chatID",
-                      });
-                    }
+                          if (isCurrentThread) {
+                            await router.navigate({
+                              params: {
+                                notebookID,
+                                chatID: crypto.randomUUID(),
+                              },
+                              replace: true,
+                              to: "/$notebookID/$chatID",
+                            });
+                          }
 
-                    await router.invalidate();
-                  }}
-                  title="Delete thread"
-                >
-                  <Trash2Icon />
-                </Button>
+                          await router.invalidate();
+                        }}
+                      >
+                        <Trash2Icon />
+                      </Button>
+                    </>
+                  )}
+                </div>
+                {editingThreadID === thread.sessionID && renameError ? (
+                  <p className="px-2 text-xs text-destructive" role="alert">
+                    {renameError}
+                  </p>
+                ) : null}
               </div>
             ))}
           </div>

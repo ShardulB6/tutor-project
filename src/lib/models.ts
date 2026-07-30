@@ -4,6 +4,8 @@ export type TutorModel = {
   name: string;
 };
 
+export const CHAT_TITLE_MODEL = "openai/gpt-5-nano" as const;
+
 export const TUTOR_MODELS = [
   {
     id: "openai/gpt-4o-mini",

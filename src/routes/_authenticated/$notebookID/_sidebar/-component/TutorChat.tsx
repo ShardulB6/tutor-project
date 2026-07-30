@@ -2,6 +2,7 @@
 
 import { useAgentChat } from "@cloudflare/ai-chat/react";
 import { useRouter } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useAgent } from "agents/react";
 import { BotIcon, BrainIcon, CheckIcon, ChevronDownIcon } from "lucide-react";
 import { useState } from "react";
@@ -48,6 +49,7 @@ import {
   type TutorModelId,
   type TutorReasoningLevel,
 } from "#/lib/models";
+import { generateServerThreadTitle } from "#/lib/functions/threads.function";
 import { cn } from "#/lib/utils";
 
 type TutorChatProps = {
@@ -57,6 +59,7 @@ type TutorChatProps = {
 
 export function TutorChat({ notebookID, sessionID }: TutorChatProps) {
   const router = useRouter();
+  const generateThreadTitle = useServerFn(generateServerThreadTitle);
   const [isModelSelectorOpen, setIsModelSelectorOpen] = useState(false);
   const [selectedModelId, setSelectedModelId] = useState<TutorModelId>(DEFAULT_TUTOR_MODEL);
   const [selectedReasoningLevel, setSelectedReasoningLevel] = useState<TutorReasoningLevel>(
@@ -142,14 +145,27 @@ export function TutorChat({ notebookID, sessionID }: TutorChatProps) {
 
             const isNewThread = messages.length === 0;
 
-            await sendMessage({
+            const sendMessagePromise = sendMessage({
               role: "user",
               parts: [{ type: "text", text: trimmedText }],
             });
 
             if (isNewThread) {
+              await Promise.all([
+                sendMessagePromise,
+                generateThreadTitle({
+                  data: {
+                    notebookId: notebookID,
+                    question: trimmedText,
+                    sessionId: sessionID,
+                  },
+                }).catch(() => undefined),
+              ]);
               await router.invalidate();
+              return;
             }
+
+            await sendMessagePromise;
           }}
         >
           <PromptInputBody>
