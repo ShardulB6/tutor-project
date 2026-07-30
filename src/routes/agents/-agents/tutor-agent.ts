@@ -1,4 +1,5 @@
 import { Think, Session, type TurnContext } from "@cloudflare/think";
+import type { OpenAILanguageModelResponsesOptions } from "@ai-sdk/openai";
 import { gateway } from "ai";
 import { drizzle } from "drizzle-orm/d1";
 import { dbSchema } from "#/db/db-schema";
@@ -6,9 +7,10 @@ import type { NotebookId } from "#/db/schema";
 import {
   DEFAULT_TUTOR_MODEL,
   DEFAULT_TUTOR_REASONING_LEVEL,
-  getTutorReasoningConfig,
   isTutorModelId,
   isTutorReasoningLevel,
+  supportsTutorReasoning,
+  supportsTutorReasoningSummary,
 } from "#/lib/models";
 import { D1SessionProvider } from "#/lib/sessions/d1-session-provider";
 import { createListNotebookFilesTool } from "./tools/list-notebook-files";
@@ -24,14 +26,26 @@ export class TutorAgent extends Think<Cloudflare.Env> {
   override beforeTurn({ body }: TurnContext) {
     const modelId = isTutorModelId(body?.model) ? body.model : DEFAULT_TUTOR_MODEL;
     const model = gateway(modelId);
+
+    if (!supportsTutorReasoning(modelId)) {
+      return { model };
+    }
+
     const reasoningLevel = isTutorReasoningLevel(body?.reasoningLevel)
       ? body.reasoningLevel
       : DEFAULT_TUTOR_REASONING_LEVEL;
-    const reasoningConfig = getTutorReasoningConfig(modelId, reasoningLevel);
+    const supportsReasoningSummary = supportsTutorReasoningSummary(modelId);
+    const openaiOptions = {
+      reasoningEffort: reasoningLevel,
+      ...(supportsReasoningSummary ? { reasoningSummary: "auto" } : {}),
+    } satisfies OpenAILanguageModelResponsesOptions;
 
     return {
       model,
-      ...reasoningConfig,
+      sendReasoning: supportsReasoningSummary,
+      providerOptions: {
+        openai: openaiOptions,
+      },
     };
   }
 
