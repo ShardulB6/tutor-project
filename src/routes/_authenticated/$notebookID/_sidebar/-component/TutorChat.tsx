@@ -97,8 +97,17 @@ export function TutorChat({ notebookID, sessionID }: TutorChatProps) {
 
                     if (part.type === "reasoning") {
                       return (
-                        <Reasoning isStreaming={part.state === "streaming"} key={key}>
-                          <ReasoningTrigger />
+                        <Reasoning
+                          autoClose={false}
+                          defaultOpen
+                          isStreaming={part.state === "streaming"}
+                          key={key}
+                        >
+                          <ReasoningTrigger
+                            getThinkingMessage={(isStreaming) =>
+                              isStreaming ? "Generating reasoning summary..." : "Reasoning summary"
+                            }
+                          />
                           <ReasoningContent>{part.text}</ReasoningContent>
                         </Reasoning>
                       );
