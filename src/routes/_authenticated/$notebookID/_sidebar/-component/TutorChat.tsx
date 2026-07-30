@@ -3,7 +3,7 @@
 import { useAgentChat } from "@cloudflare/ai-chat/react";
 import { useRouter } from "@tanstack/react-router";
 import { useAgent } from "agents/react";
-import { BotIcon, CheckIcon, ChevronDownIcon } from "lucide-react";
+import { BotIcon, BrainIcon, CheckIcon, ChevronDownIcon } from "lucide-react";
 import { useState } from "react";
 import {
   Conversation,
@@ -29,11 +29,25 @@ import {
   PromptInputBody,
   PromptInputButton,
   PromptInputFooter,
+  PromptInputSelect,
+  PromptInputSelectContent,
+  PromptInputSelectItem,
+  PromptInputSelectTrigger,
+  PromptInputSelectValue,
   PromptInputSubmit,
   PromptInputTextarea,
 } from "#/components/ai-elements/prompt-input";
 import { Reasoning, ReasoningContent, ReasoningTrigger } from "#/components/ai-elements/reasoning";
-import { DEFAULT_TUTOR_MODEL, TUTOR_MODELS, type TutorModelId } from "#/lib/models";
+import {
+  DEFAULT_TUTOR_MODEL,
+  DEFAULT_TUTOR_REASONING_LEVEL,
+  isTutorReasoningLevel,
+  supportsTutorReasoning,
+  TUTOR_MODELS,
+  TUTOR_REASONING_LEVELS,
+  type TutorModelId,
+  type TutorReasoningLevel,
+} from "#/lib/models";
 import { cn } from "#/lib/utils";
 
 type TutorChatProps = {
@@ -45,13 +59,19 @@ export function TutorChat({ notebookID, sessionID }: TutorChatProps) {
   const router = useRouter();
   const [isModelSelectorOpen, setIsModelSelectorOpen] = useState(false);
   const [selectedModelId, setSelectedModelId] = useState<TutorModelId>(DEFAULT_TUTOR_MODEL);
+  const [selectedReasoningLevel, setSelectedReasoningLevel] = useState<TutorReasoningLevel>(
+    DEFAULT_TUTOR_REASONING_LEVEL,
+  );
   const agent = useAgent({
     agent: "TutorAgent",
     name: `${notebookID}:${sessionID}`,
   });
   const { messages, sendMessage, status, stop } = useAgentChat({
     agent,
-    body: () => ({ model: selectedModelId }),
+    body: () => ({
+      model: selectedModelId,
+      reasoningLevel: selectedReasoningLevel,
+    }),
   });
   const isBusy = status === "submitted" || status === "streaming";
   const selectedModel =
@@ -176,6 +196,32 @@ export function TutorChat({ notebookID, sessionID }: TutorChatProps) {
                   </ModelSelectorList>
                 </ModelSelectorContent>
               </ModelSelector>
+              {supportsTutorReasoning(selectedModelId) ? (
+                <PromptInputSelect
+                  disabled={isBusy}
+                  onValueChange={(value) => {
+                    if (isTutorReasoningLevel(value)) {
+                      setSelectedReasoningLevel(value);
+                    }
+                  }}
+                  value={selectedReasoningLevel}
+                >
+                  <PromptInputSelectTrigger
+                    aria-label={`Select reasoning level. Current level: ${selectedReasoningLevel}`}
+                    className="h-8 gap-1 px-2"
+                  >
+                    <BrainIcon className="size-3.5" />
+                    <PromptInputSelectValue />
+                  </PromptInputSelectTrigger>
+                  <PromptInputSelectContent>
+                    {TUTOR_REASONING_LEVELS.map((level) => (
+                      <PromptInputSelectItem key={level.id} value={level.id}>
+                        {level.name}
+                      </PromptInputSelectItem>
+                    ))}
+                  </PromptInputSelectContent>
+                </PromptInputSelect>
+              ) : null}
               <span
                 className={cn(
                   "hidden px-2 text-xs text-muted-foreground sm:inline",

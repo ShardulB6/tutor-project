@@ -4,21 +4,17 @@ import { gateway } from "ai";
 import { drizzle } from "drizzle-orm/d1";
 import { dbSchema } from "#/db/db-schema";
 import type { NotebookId } from "#/db/schema";
-import { DEFAULT_TUTOR_MODEL, isTutorModelId, type TutorModelId } from "#/lib/models";
+import {
+  DEFAULT_TUTOR_MODEL,
+  DEFAULT_TUTOR_REASONING_LEVEL,
+  isTutorModelId,
+  isTutorReasoningLevel,
+  supportsTutorReasoning,
+  supportsTutorReasoningSummary,
+} from "#/lib/models";
 import { D1SessionProvider } from "#/lib/sessions/d1-session-provider";
 import { createListNotebookFilesTool } from "./tools/list-notebook-files";
 import { createReadNotebookFileTool } from "./tools/read-notebook-file";
-
-const REASONING_MODEL_IDS: ReadonlySet<TutorModelId> = new Set([
-  "openai/o1",
-  "openai/o3",
-  "openai/gpt-5.4",
-]);
-
-const REASONING_SUMMARY_MODEL_IDS: ReadonlySet<TutorModelId> = new Set([
-  "openai/o3",
-  "openai/gpt-5.4",
-]);
 
 export class TutorAgent extends Think<Cloudflare.Env> {
   workspaceBash = false;
@@ -31,13 +27,16 @@ export class TutorAgent extends Think<Cloudflare.Env> {
     const modelId = isTutorModelId(body?.model) ? body.model : DEFAULT_TUTOR_MODEL;
     const model = gateway(modelId);
 
-    if (!REASONING_MODEL_IDS.has(modelId)) {
+    if (!supportsTutorReasoning(modelId)) {
       return { model };
     }
 
-    const supportsReasoningSummary = REASONING_SUMMARY_MODEL_IDS.has(modelId);
+    const reasoningLevel = isTutorReasoningLevel(body?.reasoningLevel)
+      ? body.reasoningLevel
+      : DEFAULT_TUTOR_REASONING_LEVEL;
+    const supportsReasoningSummary = supportsTutorReasoningSummary(modelId);
     const openaiOptions = {
-      reasoningEffort: "medium",
+      reasoningEffort: reasoningLevel,
       ...(supportsReasoningSummary ? { reasoningSummary: "auto" } : {}),
     } satisfies OpenAILanguageModelResponsesOptions;
 
