@@ -7,6 +7,8 @@ export * from "./auth-schema";
 
 export type NotebookId = string & z.$brand<"NotebookId">;
 
+export const CHAT_TITLE_STATUSES = ["pending", "complete", "failed"] as const;
+
 export const timestampColumns = {
   createdAt: integer("created_at", { mode: "timestamp" })
     .default(sql`(unixepoch())`)
@@ -34,13 +36,34 @@ export const notebookRelations = relations(NotebooksTable, ({ one, many }) => ({
     fields: [NotebooksTable.userID],
     references: [authSchema.user.id],
   }),
+  chatSessions: many(ChatSessionsTable),
   sessionMessages: many(SessionMessagesTable),
 }));
 
-export const ChatSessionsTable = sqliteTable("chatSessions", {
-  sessionID: text("session_id").primaryKey(),
-  name: text("name").notNull(),
-});
+export const ChatSessionsTable = sqliteTable(
+  "chatSessions",
+  {
+    notebookID: text("notebook_id")
+      .$type<NotebookId>()
+      .references(() => NotebooksTable.id, { onDelete: "cascade" })
+      .notNull(),
+    sessionID: text("session_id").notNull(),
+    name: text("name").default("New chat").notNull(),
+    titleStatus: text("title_status", { enum: CHAT_TITLE_STATUSES }).default("pending").notNull(),
+    ...timestampColumns,
+  },
+  (table) => [
+    primaryKey({ columns: [table.notebookID, table.sessionID] }),
+    index("chat_sessions_notebook_updated_idx").on(table.notebookID, table.updatedAt),
+  ],
+);
+
+export const chatSessionsRelations = relations(ChatSessionsTable, ({ one }) => ({
+  notebook: one(NotebooksTable, {
+    fields: [ChatSessionsTable.notebookID],
+    references: [NotebooksTable.id],
+  }),
+}));
 
 export const SessionMessagesTable = sqliteTable(
   "assistant_messages",
