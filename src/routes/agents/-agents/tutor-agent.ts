@@ -1,12 +1,24 @@
 import { Think, Session, type TurnContext } from "@cloudflare/think";
+import type { OpenAILanguageModelResponsesOptions } from "@ai-sdk/openai";
 import { gateway } from "ai";
 import { drizzle } from "drizzle-orm/d1";
 import { dbSchema } from "#/db/db-schema";
 import type { NotebookId } from "#/db/schema";
-import { DEFAULT_TUTOR_MODEL, isTutorModelId } from "#/lib/models";
+import { DEFAULT_TUTOR_MODEL, isTutorModelId, type TutorModelId } from "#/lib/models";
 import { D1SessionProvider } from "#/lib/sessions/d1-session-provider";
 import { createListNotebookFilesTool } from "./tools/list-notebook-files";
 import { createReadNotebookFileTool } from "./tools/read-notebook-file";
+
+const REASONING_MODEL_IDS: ReadonlySet<TutorModelId> = new Set([
+  "openai/o1",
+  "openai/o3",
+  "openai/gpt-5.4",
+]);
+
+const REASONING_SUMMARY_MODEL_IDS: ReadonlySet<TutorModelId> = new Set([
+  "openai/o3",
+  "openai/gpt-5.4",
+]);
 
 export class TutorAgent extends Think<Cloudflare.Env> {
   workspaceBash = false;
@@ -16,11 +28,26 @@ export class TutorAgent extends Think<Cloudflare.Env> {
   }
 
   override beforeTurn({ body }: TurnContext) {
-    const modelId = body?.model;
+    const modelId = isTutorModelId(body?.model) ? body.model : DEFAULT_TUTOR_MODEL;
+    const model = gateway(modelId);
 
-    if (isTutorModelId(modelId)) {
-      return { model: gateway(modelId) };
+    if (!REASONING_MODEL_IDS.has(modelId)) {
+      return { model };
     }
+
+    const supportsReasoningSummary = REASONING_SUMMARY_MODEL_IDS.has(modelId);
+    const openaiOptions = {
+      reasoningEffort: "medium",
+      ...(supportsReasoningSummary ? { reasoningSummary: "auto" } : {}),
+    } satisfies OpenAILanguageModelResponsesOptions;
+
+    return {
+      model,
+      sendReasoning: supportsReasoningSummary,
+      providerOptions: {
+        openai: openaiOptions,
+      },
+    };
   }
 
   getSystemPrompt() {

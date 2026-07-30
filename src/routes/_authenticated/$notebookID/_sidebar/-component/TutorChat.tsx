@@ -32,6 +32,7 @@ import {
   PromptInputSubmit,
   PromptInputTextarea,
 } from "#/components/ai-elements/prompt-input";
+import { Reasoning, ReasoningContent, ReasoningTrigger } from "#/components/ai-elements/reasoning";
 import { DEFAULT_TUTOR_MODEL, TUTOR_MODELS, type TutorModelId } from "#/lib/models";
 import { cn } from "#/lib/utils";
 
@@ -71,16 +72,28 @@ export function TutorChat({ notebookID, sessionID }: TutorChatProps) {
             messages.map((message) => (
               <Message from={message.role} key={message.id}>
                 <MessageContent>
-                  {message.parts.map((part, index) =>
-                    part.type === "text" ? (
-                      <MessageResponse
-                        isAnimating={status === "streaming"}
-                        key={`${message.id}-${index}`}
-                      >
-                        {part.text}
-                      </MessageResponse>
-                    ) : null,
-                  )}
+                  {message.parts.map((part, index) => {
+                    const key = `${message.id}-${index}`;
+
+                    if (part.type === "reasoning") {
+                      return (
+                        <Reasoning isStreaming={part.state === "streaming"} key={key}>
+                          <ReasoningTrigger />
+                          <ReasoningContent>{part.text}</ReasoningContent>
+                        </Reasoning>
+                      );
+                    }
+
+                    if (part.type === "text") {
+                      return (
+                        <MessageResponse isAnimating={status === "streaming"} key={key}>
+                          {part.text}
+                        </MessageResponse>
+                      );
+                    }
+
+                    return null;
+                  })}
                 </MessageContent>
               </Message>
             ))
