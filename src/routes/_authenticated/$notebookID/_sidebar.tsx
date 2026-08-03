@@ -134,7 +134,7 @@ export function AppSidebar({ notebook, notebookID, threads }: ChatSidebarProps) 
           <div className="space-y-1">
             {visibleThreads.map((thread) => (
               <div className="space-y-1" key={thread.sessionID}>
-                <div className="flex items-center gap-1 rounded-md px-1 py-0.5 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
+                <div className="flex items-center gap-1 rounded-md px-1 py-0.5 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground has-[[data-status=active]]:bg-sidebar-accent has-[[data-status=active]]:text-sidebar-accent-foreground">
                   {editingThreadID === thread.sessionID ? (
                     <form
                       className="flex min-w-0 flex-1 items-center gap-1"
@@ -186,9 +186,6 @@ export function AppSidebar({ notebook, notebookID, threads }: ChatSidebarProps) 
                   ) : (
                     <>
                       <Link
-                        activeProps={{
-                          className: "bg-sidebar-accent text-sidebar-accent-foreground",
-                        }}
                         className="min-w-0 flex-1 truncate rounded-md px-2 py-1.5 text-sm"
                         params={{ notebookID, chatID: thread.sessionID }}
                         reloadDocument
