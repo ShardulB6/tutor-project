@@ -21,6 +21,7 @@ import {
   getServerThreads,
   renameServerThread,
 } from "#/lib/functions/threads.function";
+import { cn } from "#/lib/utils";
 import { useServerFn } from "@tanstack/react-start";
 import { type FormEvent, useEffect, useState } from "react";
 import z from "zod";
@@ -159,6 +160,7 @@ export function AppSidebar({ notebook, notebookID, threads }: ChatSidebarProps) 
                       />
                       <Button
                         aria-label="Save chat name"
+                        className={cn("hover:bg-gray-200 dark:hover:bg-gray-600")}
                         disabled={renamingThreadID === thread.sessionID}
                         size="icon-xs"
                         title="Save chat name"
@@ -169,6 +171,7 @@ export function AppSidebar({ notebook, notebookID, threads }: ChatSidebarProps) 
                       </Button>
                       <Button
                         aria-label="Cancel renaming"
+                        className={cn("hover:bg-gray-200 dark:hover:bg-gray-600")}
                         disabled={renamingThreadID === thread.sessionID}
                         size="icon-xs"
                         title="Cancel renaming"
@@ -196,7 +199,7 @@ export function AppSidebar({ notebook, notebookID, threads }: ChatSidebarProps) 
                       </Link>
                       <Button
                         aria-label={`Rename chat ${thread.name}`}
-                        className="shrink-0"
+                        className={cn("shrink-0 hover:bg-gray-200 dark:hover:bg-gray-600")}
                         disabled={renamingThreadID !== null}
                         size="icon-xs"
                         title="Rename chat"
@@ -211,7 +214,7 @@ export function AppSidebar({ notebook, notebookID, threads }: ChatSidebarProps) 
                       </Button>
                       <Button
                         aria-label={`Delete thread ${thread.name}`}
-                        className="shrink-0"
+                        className={cn("shrink-0 hover:bg-gray-200 dark:hover:bg-gray-600")}
                         disabled={renamingThreadID !== null}
                         size="icon-xs"
                         title="Delete thread"
