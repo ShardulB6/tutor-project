@@ -5,6 +5,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { env } from "cloudflare:workers";
 import crypto from "node:crypto";
 import { z } from "zod";
+import { fileTopicsSchema, parseStoredFileTopics, serializeFileTopics } from "../file-topics";
 import { ensureNotebook } from "./ensure.function";
 // TODO add branding
 export const saveFileSchema = createServerFn({ method: "POST" })
@@ -77,6 +78,30 @@ export const deleteFile = createServerFn({ method: "POST" })
     return { success: true };
   });
 
+export const updateFileTopics = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      notebookId: z.string().brand<"NotebookId">(),
+      fileId: z.string(),
+      topics: fileTopicsSchema,
+    }),
+  )
+  .handler(async ({ data }) => {
+    await ensureNotebook(data.notebookId);
+
+    const [updatedFile] = await db
+      .update(files)
+      .set({ topics: serializeFileTopics(data.topics) })
+      .where(and(eq(files.id, data.fileId), eq(files.notebookID, data.notebookId)))
+      .returning({ topics: files.topics });
+
+    if (!updatedFile) {
+      throw new Error("File not found");
+    }
+
+    return { topics: parseStoredFileTopics(updatedFile.topics) };
+  });
+
 export const getFiles = createServerFn({ method: "GET" })
   .inputValidator(
     z.object({
@@ -86,7 +111,7 @@ export const getFiles = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     await ensureNotebook(data.notebookId);
 
-    return db
+    const notebookFiles = await db
       .select({
         id: files.id,
         title: files.title,
@@ -94,10 +119,16 @@ export const getFiles = createServerFn({ method: "GET" })
         size: files.size,
         contentType: files.contentType,
         storageKey: files.storageKey,
+        topics: files.topics,
         createdAt: files.createdAt,
         updatedAt: files.updatedAt,
       })
       .from(files)
       .where(eq(files.notebookID, data.notebookId))
       .orderBy(desc(files.createdAt));
+
+    return notebookFiles.map((file) => ({
+      ...file,
+      topics: parseStoredFileTopics(file.topics),
+    }));
   });

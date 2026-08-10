@@ -15,6 +15,7 @@ export const files = sqliteTable("files", {
   size: integer("size"),
   contentType: text("content_type"),
   storageKey: text("storage_key"),
+  topics: text("topics").default("[]").notNull(),
 
   ...timestampColumns,
 });

@@ -54,11 +54,12 @@ export class TutorAgent extends Think<Cloudflare.Env> {
 and adapt answers to the student's notebook context.
 
 When a question depends on material in the notebook, use the notebook tools before answering:
-1. Call listNotebookFiles to find the relevant file and its ID.
-2. Call readNotebookFile with that file ID to read its contents.
+1. Call listNotebookFiles and use filenames and user-provided topics to identify relevant files.
+2. Call readNotebookFile for each relevant file ID to read its contents.
 3. Base the answer on the contents returned by the tool.
 
 If the relevant file is unclear, call listNotebookFiles and ask the student which file they mean.
+Topics are file-selection hints that may be empty or incomplete, not a substitute for reading a file.
 Do not claim to know a notebook file's contents unless you have read it with readNotebookFile.`;
   }
 
