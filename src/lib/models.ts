@@ -32,6 +32,21 @@ export const TUTOR_MODELS = [
     provider: "Open AI",
     name: "GPT-5.4",
   },
+  {
+    id: "openai/gpt-5.6-sol",
+    provider: "Open AI",
+    name: "GPT-5.6 Sol",
+  },
+  {
+    id: "openai/gpt-5.6-luna",
+    provider: "Open AI",
+    name: "GPT-5.6 Luna",
+  },
+  {
+    id: "openai/gpt-5.6-terra",
+    provider: "Open AI",
+    name: "GPT-5.6 Terra",
+  },
 ] as const satisfies readonly TutorModel[];
 
 export type TutorModelId = (typeof TUTOR_MODELS)[number]["id"];
