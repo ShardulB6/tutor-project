@@ -9,7 +9,7 @@ import {
 } from "#/lib/functions/file.functions";
 import { MAX_FILE_TOPICS, MAX_FILE_TOPIC_LENGTH, parseFileTopicsInput } from "#/lib/file-topics";
 import { createFileRoute, Outlet, useRouter } from "@tanstack/react-router";
-import { CheckIcon, Trash2Icon } from "lucide-react";
+import { CheckIcon, CircleHelpIcon, FileTextIcon, LayersIcon, Trash2Icon } from "lucide-react";
 import { type FormEvent, useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/$notebookID/_sidebar/_panel")({
@@ -221,8 +221,22 @@ function RouteComponent() {
       </ResizablePanel>
       <ResizableHandle />
       <ResizablePanel defaultSize="20%" minSize="10%">
-        <div className="flex h-20 items-center justify-center p-6">
+        <div className="flex shrink-0 flex-col items-center gap-3 px-4 py-4">
           <span className="font-semibold">JSON</span>
+          <div className="flex w-full flex-col gap-2">
+            <Button type="button" variant="outline">
+              <FileTextIcon />
+              Exam
+            </Button>
+            <Button type="button" variant="outline">
+              <CircleHelpIcon />
+              Quiz
+            </Button>
+            <Button type="button" variant="outline">
+              <LayersIcon />
+              Flashcards
+            </Button>
+          </div>
         </div>
       </ResizablePanel>
     </ResizablePanelGroup>
