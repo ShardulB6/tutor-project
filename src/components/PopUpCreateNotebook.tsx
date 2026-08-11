@@ -13,12 +13,15 @@ import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type React from "react";
+import { useState } from "react";
 
 type PopUpCreateNotebookProps = {
   onCreate: (data: { title: string }) => void | Promise<void>;
 };
 
 export function DialogDemo({ onCreate }: PopUpCreateNotebookProps) {
+  const [open, setOpen] = useState(false);
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
@@ -29,10 +32,12 @@ export function DialogDemo({ onCreate }: PopUpCreateNotebookProps) {
     } else {
       await onCreate({ title });
     }
+
+    setOpen(false);
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="bg-[#1A1D22] text-white hover:bg-[#1A1D22]/90">Create Notebook</Button>
       </DialogTrigger>
