@@ -67,6 +67,9 @@ const REASONING_MODEL_IDS: ReadonlySet<TutorModelId> = new Set([
   "openai/o1",
   "openai/o3",
   "openai/gpt-5.4",
+  "openai/gpt-5.6-sol",
+  "openai/gpt-5.6-luna",
+  "openai/gpt-5.6-terra",
 ]);
 
 const REASONING_SUMMARY_MODEL_IDS: ReadonlySet<TutorModelId> = new Set([
