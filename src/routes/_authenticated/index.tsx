@@ -84,7 +84,7 @@ export function NotebookCard({
       />
       <CardHeader>
         <CardAction></CardAction>
-        <CardTitle className="truncate">{notebook.title}</CardTitle>
+        <CardTitle className="truncate leading-normal">{notebook.title}</CardTitle>
         <CardDescription>Created on {notebook.createdAt?.toLocaleDateString()}</CardDescription>
       </CardHeader>
       <CardFooter className="flex flex-col gap-2">
