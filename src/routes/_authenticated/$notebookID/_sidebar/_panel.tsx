@@ -132,7 +132,7 @@ function RouteComponent() {
           </div>
           <ul className="min-h-0 flex-1 overflow-y-auto">
             {files.map((file) => (
-              <li className="border-b py-1 last:border-b-0" key={file.id}>
+              <li className="border-border border-b py-1 last:border-b-0" key={file.id}>
                 <div className="flex items-start gap-2 rounded-md p-2 text-sm">
                   <span className="wrap-break-word min-w-0 flex-1">{file.title}</span>
                   <Button
@@ -167,7 +167,6 @@ function RouteComponent() {
                       }
                       id={`file-topics-${file.id}`}
                       maxLength={MAX_FILE_TOPICS * (MAX_FILE_TOPIC_LENGTH + 2)}
-                      placeholder="algebra, quadratic equations"
                       value={topicDrafts[file.id] ?? file.topics.join(", ")}
                       onChange={(event) => {
                         setTopicDrafts((currentDrafts) => ({
