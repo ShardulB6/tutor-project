@@ -1,11 +1,19 @@
 import { db } from "#/db";
-import { ChatSessionsTable, type NotebookId, SessionMessagesTable } from "#/db/schema";
+import {
+  ChatSessionsTable,
+  type NotebookId,
+  SessionCompactionsTable,
+  SessionMessagesTable,
+} from "#/db/schema";
 import type { OpenAILanguageModelResponsesOptions } from "@ai-sdk/openai";
 import { createServerFn } from "@tanstack/react-start";
+import { env } from "cloudflare:workers";
 import { and, desc, eq, max, sql } from "drizzle-orm";
 import { gateway, generateText } from "ai";
+import { getAgentByName } from "agents";
 import { z } from "zod";
 import { CHAT_TITLE_MODEL } from "#/lib/models";
+import type { TutorAgent } from "#/routes/agents/-agents/tutor-agent";
 import { ensureNotebook } from "./ensure.function";
 
 const MAX_THREAD_NAME_LENGTH = 60;
@@ -217,13 +225,28 @@ export const deleteServerThread = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     await ensureNotebook(data.notebookId);
-    //TODO: Clean up sessions api/agents sdk resources aswell
+
+    const agent = await getAgentByName(
+      env.TutorAgent as unknown as DurableObjectNamespace<TutorAgent>,
+      `${data.notebookId}:${data.sessionId}`,
+    );
+    await agent.destroy();
+
     await db
       .delete(SessionMessagesTable)
       .where(
         and(
           eq(SessionMessagesTable.notebookID, data.notebookId),
           eq(SessionMessagesTable.sessionID, data.sessionId),
+        ),
+      );
+
+    await db
+      .delete(SessionCompactionsTable)
+      .where(
+        and(
+          eq(SessionCompactionsTable.notebookID, data.notebookId),
+          eq(SessionCompactionsTable.sessionID, data.sessionId),
         ),
       );
 
