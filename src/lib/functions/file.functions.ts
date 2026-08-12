@@ -7,7 +7,9 @@ import crypto from "node:crypto";
 import { z } from "zod";
 import { fileTopicsSchema, parseStoredFileTopics, serializeFileTopics } from "../file-topics";
 import { ensureNotebook } from "./ensure.function";
-// TODO add branding
+
+const fileIdSchema = z.string().brand<"FileId">();
+
 export const saveFileSchema = createServerFn({ method: "POST" })
   .inputValidator((formData: FormData) =>
     z
@@ -23,7 +25,7 @@ export const saveFileSchema = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const notebook = await ensureNotebook(data.notebookId);
 
-    const id = crypto.randomUUID();
+    const id = fileIdSchema.parse(crypto.randomUUID());
     const storageKey = `${notebook.userID}/${data.notebookId}/${id}`;
 
     await env.TUTOR_BUCKET.put(storageKey, data.file, {
@@ -55,7 +57,7 @@ export const deleteFile = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({
       notebookId: z.string().brand<"NotebookId">(),
-      fileId: z.string(),
+      fileId: fileIdSchema,
     }),
   )
   .handler(async ({ data }) => {
@@ -82,7 +84,7 @@ export const updateFileTopics = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({
       notebookId: z.string().brand<"NotebookId">(),
-      fileId: z.string(),
+      fileId: fileIdSchema,
       topics: fileTopicsSchema,
     }),
   )
@@ -129,6 +131,7 @@ export const getFiles = createServerFn({ method: "GET" })
 
     return notebookFiles.map((file) => ({
       ...file,
+      id: fileIdSchema.parse(file.id),
       topics: parseStoredFileTopics(file.topics),
     }));
   });
