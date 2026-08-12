@@ -7,7 +7,7 @@ export * from "./auth-schema";
 
 export type NotebookId = string & z.$brand<"NotebookId">;
 
-export const CHAT_TITLE_STATUSES = ["pending", "complete", "failed"] as const;
+export const TITLE_STATUSES = ["pending", "complete", "failed"] as const;
 
 export const timestampColumns = {
   createdAt: integer("created_at", { mode: "timestamp" })
@@ -49,7 +49,7 @@ export const ChatSessionsTable = sqliteTable(
       .notNull(),
     sessionID: text("session_id").notNull(),
     name: text("name").default("New chat").notNull(),
-    titleStatus: text("title_status", { enum: CHAT_TITLE_STATUSES }).default("pending").notNull(),
+    titleStatus: text("title_status", { enum: TITLE_STATUSES }).default("pending").notNull(),
     ...timestampColumns,
   },
   (table) => [
