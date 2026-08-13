@@ -1,232 +1,140 @@
-Welcome to the Tutor AI app!
+# Tutor AI
 
-# Getting Started
+Tutor AI is a notebook-based study workspace for learning from your own material. Users can
+organize PDF sources into notebooks, label each source with topics, and ask an AI tutor questions
+grounded in those files.
 
-To run this application:
+The application runs on Cloudflare Workers. It combines a TanStack Start frontend with a stateful
+Cloudflare agent, D1 for application and chat data, and R2 for uploaded PDFs.
 
-```bash
-pnpm install
-pnpm dev
+## Features
+
+- GitHub sign-in with Better Auth but will have actual auth in the future
+- Per-user notebooks and PDF source libraries
+- User-defined source topics that help the tutor select relevant files
+- Source-aware tutoring with tools that list and read notebook PDFs
+- Persistent chat threads with generated titles, renaming, and deletion
+- A choice of tutor models and reasoning levels
+- Resizable source, chat, and study-tool panels
+
+The Exam, Quiz, and Flashcards controls in the Studio panel are currently placeholders for future
+study tools.
+
+## Architecture
+
+| Area              | Implementation                                               |
+| ----------------- | ------------------------------------------------------------ |
+| Web application   | React 19, TanStack Start, TanStack Router, and Vite          |
+| UI                | Tailwind CSS and shadcn/ui components                        |
+| Tutor             | Cloudflare Agents SDK and `@cloudflare/think`                |
+| Model access      | Vercel AI Gateway through the AI SDK                         |
+| Authentication    | Better Auth with GitHub OAuth                                |
+| Relational data   | Cloudflare D1 with Drizzle ORM                               |
+| File storage      | Cloudflare R2                                                |
+| Stateful sessions | Cloudflare Durable Objects with chat history persisted to D1 |
+
+Each chat addresses a `TutorAgent` by notebook and session ID. When a question depends on the
+notebook material, the agent first lists the available sources, uses filenames and topics to find
+the relevant PDFs, and then reads those files before answering.
+
+## Local development
+
+### Prerequisites
+
+- Node.js and pnpm 11
+- A GitHub OAuth app
+- A Vercel AI Gateway API key
+
+For local authentication, configure the GitHub OAuth callback URL as:
+
+```text
+http://localhost:3000/api/auth/callback/github
 ```
 
-# Building For Production
+### Setup
 
-To build this application for production:
-
-```bash
-pnpm build
-```
-
-## Testing
-
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
-
-```bash
-pnpm test
-```
-
-## Styling
-
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
-
-### Removing Tailwind CSS
-
-If you prefer not to use Tailwind CSS:
-
-1. Remove the demo pages in `src/routes/demo/`
-2. Replace the Tailwind import in `src/styles.css` with your own styles
-3. Remove `tailwindcss()` from the plugins array in `vite.config.ts`
-4. Uninstall the packages: `pnpm add @tailwindcss/vite tailwindcss --dev`
-
-## Setting up Better Auth
-
-1. Generate and set the `BETTER_AUTH_SECRET` environment variable in your `.env.local`:
+1. Install dependencies:
 
    ```bash
-   pnpm dlx @better-auth/cli secret
+   pnpm install
    ```
 
-2. Visit the [Better Auth documentation](https://www.better-auth.com) to unlock the full potential of authentication in your app.
+2. Create `.env.local` with the application secrets:
 
-### Adding a Database (Optional)
+   ```dotenv
+   BETTER_AUTH_URL=http://localhost:3000
+   BETTER_AUTH_SECRET=replace-with-a-long-random-secret
+   GITHUB_CLIENT_ID=your-github-client-id
+   GITHUB_CLIENT_SECRET=your-github-client-secret
+   AI_GATEWAY_API_KEY=your-ai-gateway-api-key
+   ```
 
-Better Auth can work in stateless mode, but to persist user data, add a database:
+3. Apply the D1 migrations to the local database:
 
-```typescript
-// src/lib/auth.ts
-import { betterAuth } from "better-auth";
-import { Pool } from "pg";
+   ```bash
+   pnpm db:migrate
+   ```
 
-export const auth = betterAuth({
-  database: new Pool({
-    connectionString: process.env.DATABASE_URL,
-  }),
-  // ... rest of config
-});
+4. Start the development server:
+
+   ```bash
+   pnpm dev
+   ```
+
+The app is available at [http://localhost:3000](http://localhost:3000). Wrangler keeps local D1,
+R2, and Durable Object state under `.wrangler/`.
+
+## Commands
+
+| Command                  | Purpose                                               |
+| ------------------------ | ----------------------------------------------------- |
+| `pnpm dev`               | Start the local development server on port 3000       |
+| `pnpm build`             | Create a production build                             |
+| `pnpm preview`           | Preview the production build locally                  |
+| `pnpm test`              | Run the Vitest test suite                             |
+| `pnpm check`             | Run formatting, linting, and type checks              |
+| `pnpm db:generate`       | Generate a Drizzle migration from schema changes      |
+| `pnpm db:migrate`        | Apply D1 migrations locally                           |
+| `pnpm db:migrate:remote` | Apply D1 migrations to the configured remote database |
+| `pnpm db:studio`         | Open Drizzle Studio                                   |
+| `pnpm deploy`            | Build and deploy the Worker with Wrangler             |
+
+## Deployment
+
+The Worker configuration is in [`wrangler.toml`](./wrangler.toml). Before deploying your own
+instance:
+
+1. Create a D1 database and R2 bucket in your Cloudflare account.
+2. Update the D1 database ID and resource names in `wrangler.toml`.
+3. Configure the environment variables from `.env.local` for the deployed Worker. Set
+   `BETTER_AUTH_URL` to the production application URL and update the GitHub OAuth callback URL to
+   match.
+4. Apply the remote migrations with `pnpm db:migrate:remote`.
+5. Run `pnpm deploy`.
+
+The `TutorAgent` Durable Object binding and its initial SQLite migration are already declared in
+`wrangler.toml`.
+
+## Project structure
+
+```text
+src/
+├── components/              Shared shadcn/ui and AI interface components
+├── db/                      Drizzle schemas for auth, notebooks, files, and chats
+├── lib/                     Auth, server functions, models, and session persistence
+├── routes/                  TanStack Router pages and API routes
+│   └── agents/              Tutor agent and notebook-file tools
+└── server.ts                Cloudflare Worker entry point
+drizzle/                     Versioned D1 migrations
+wrangler.toml                Worker bindings and deployment configuration
 ```
 
-Then run migrations:
+## Technology
 
-```bash
-pnpm dlx @better-auth/cli migrate
-```
-
-## Shadcn
-
-Add components using the latest version of [Shadcn](https://ui.shadcn.com/).
-
-```bash
-pnpm dlx shadcn@latest add button
-```
-
-## Routing
-
-This project uses [TanStack Router](https://tanstack.com/router) with file-based routing. Routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
-```
-
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
-```
-
-This will create a link that will navigate to the `/about` route.
-
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you render `{children}` in the `shellComponent`.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router";
-
-export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "My App" },
-    ],
-  }),
-  shellComponent: ({ children }) => (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <header>
-          <nav>
-            <Link to="/">Home</Link>
-            <Link to="/about">About</Link>
-          </nav>
-        </header>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  ),
-});
-```
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-## Server Functions
-
-TanStack Start provides server functions that allow you to write server-side code that seamlessly integrates with your client components.
-
-```tsx
-import { createServerFn } from "@tanstack/react-start";
-
-const getServerTime = createServerFn({
-  method: "GET",
-}).handler(async () => {
-  return new Date().toISOString();
-});
-
-// Use in a component
-function MyComponent() {
-  const [time, setTime] = useState("");
-
-  useEffect(() => {
-    getServerTime().then(setTime);
-  }, []);
-
-  return <div>Server time: {time}</div>;
-}
-```
-
-## API Routes
-
-You can create API routes by using the `server` property in your route definitions:
-
-```tsx
-import { createFileRoute } from "@tanstack/react-router";
-import { json } from "@tanstack/react-start";
-
-export const Route = createFileRoute("/api/hello")({
-  server: {
-    handlers: {
-      GET: () => json({ message: "Hello, World!" }),
-    },
-  },
-});
-```
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-import { createFileRoute } from "@tanstack/react-router";
-
-export const Route = createFileRoute("/people")({
-  loader: async () => {
-    const response = await fetch("https://swapi.dev/api/people");
-    return response.json();
-  },
-  component: PeopleComponent,
-});
-
-function PeopleComponent() {
-  const data = Route.useLoaderData();
-  return (
-    <ul>
-      {data.results.map((person) => (
-        <li key={person.name}>{person.name}</li>
-      ))}
-    </ul>
-  );
-}
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-# Demo files
-
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
-
-For TanStack Start specific documentation, visit [TanStack Start](https://tanstack.com/start).
+- [TanStack Start](https://tanstack.com/start)
+- [Cloudflare Workers](https://developers.cloudflare.com/workers/)
+- [Cloudflare Agents](https://developers.cloudflare.com/agents/)
+- [Drizzle ORM](https://orm.drizzle.team/)
+- [Better Auth](https://www.better-auth.com/)
+- [AI SDK](https://ai-sdk.dev/)
+- [shadcn/ui](https://ui.shadcn.com/)
