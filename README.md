@@ -1,3 +1,5 @@
+Note that the project is not finished
+
 # Tutor AI
 
 Tutor AI is a notebook-based study workspace for learning from your own material. Users can
