@@ -7,13 +7,12 @@ import {
 } from "#/db/schema";
 import type { OpenAILanguageModelResponsesOptions } from "@ai-sdk/openai";
 import { createServerFn } from "@tanstack/react-start";
-import { env } from "cloudflare:workers";
+import { exports as workerExports } from "cloudflare:workers";
 import { and, desc, eq, max, sql } from "drizzle-orm";
 import { createGateway, generateText } from "ai";
 import { getAgentByName } from "agents";
 import { z } from "zod";
 import { CHAT_TITLE_MODEL } from "#/lib/models";
-import type { TutorAgent } from "#/routes/agents/-agents/tutor-agent";
 import { ensureNotebook } from "./ensure.function";
 
 const MAX_THREAD_NAME_LENGTH = 60;
@@ -229,7 +228,7 @@ export const deleteServerThread = createServerFn({ method: "POST" })
     await ensureNotebook(data.notebookId);
 
     const agent = await getAgentByName(
-      env.TutorAgent as unknown as DurableObjectNamespace<TutorAgent>,
+      workerExports.TutorAgent,
       `${data.notebookId}:${data.sessionId}`,
     );
     await agent.destroy();
