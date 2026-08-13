@@ -13,6 +13,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AgentsSplatRouteImport } from './routes/agents/$'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AuthenticatedNotebookIDSidebarRouteImport } from './routes/_authenticated/$notebookID/_sidebar'
 import { Route as AuthenticatedNotebookIDSidebarPanelRouteImport } from './routes/_authenticated/$notebookID/_sidebar/_panel'
@@ -37,6 +38,11 @@ const AgentsSplatRoute = AgentsSplatRouteImport.update({
   id: '/agents/$',
   path: '/agents/$',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
@@ -70,6 +76,7 @@ const AuthenticatedNotebookIDSidebarPanelChatIDRoute =
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/login': typeof LoginRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/agents/$': typeof AgentsSplatRoute
   '/$notebookID': typeof AuthenticatedNotebookIDSidebarPanelRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/agents/$': typeof AgentsSplatRoute
   '/': typeof AuthenticatedIndexRoute
   '/$notebookID': typeof AuthenticatedNotebookIDSidebarPanelIndexRoute
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/agents/$': typeof AgentsSplatRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/$notebookID/_sidebar': typeof AuthenticatedNotebookIDSidebarRouteWithChildren
@@ -101,6 +110,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/settings'
     | '/agents/$'
     | '/$notebookID'
     | '/api/auth/$'
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
+    | '/settings'
     | '/agents/$'
     | '/'
     | '/$notebookID'
@@ -118,6 +129,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_authenticated'
     | '/login'
+    | '/_authenticated/settings'
     | '/agents/$'
     | '/_authenticated/'
     | '/_authenticated/$notebookID/_sidebar'
@@ -163,6 +175,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/agents/$'
       preLoaderRoute: typeof AgentsSplatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -236,11 +255,13 @@ const AuthenticatedNotebookIDSidebarRouteWithChildren =
   )
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedNotebookIDSidebarRoute: typeof AuthenticatedNotebookIDSidebarRouteWithChildren
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedNotebookIDSidebarRoute:
     AuthenticatedNotebookIDSidebarRouteWithChildren,

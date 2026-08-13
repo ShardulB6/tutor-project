@@ -1,10 +1,10 @@
 "use client";
 
 import { useAgentChat } from "@cloudflare/ai-chat/react";
-import { useRouter } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useAgent } from "agents/react";
-import { BotIcon, BrainIcon, CheckIcon, ChevronDownIcon } from "lucide-react";
+import { BotIcon, BrainIcon, CheckIcon, ChevronDownIcon, KeyRoundIcon } from "lucide-react";
 import { useState } from "react";
 import {
   Conversation,
@@ -39,6 +39,8 @@ import {
   PromptInputTextarea,
 } from "#/components/ai-elements/prompt-input";
 import { Reasoning, ReasoningContent, ReasoningTrigger } from "#/components/ai-elements/reasoning";
+import { Alert, AlertDescription, AlertTitle } from "#/components/ui/alert";
+import { Button } from "#/components/ui/button";
 import {
   DEFAULT_TUTOR_MODEL,
   DEFAULT_TUTOR_REASONING_LEVEL,
@@ -51,6 +53,7 @@ import {
 } from "#/lib/models";
 import { generateServerThreadTitle } from "#/lib/functions/threads.function";
 import { cn } from "#/lib/utils";
+import { useVercelAiGatewayApiKey } from "#/lib/vercel-ai-gateway-key";
 
 type TutorChatProps = {
   notebookID: string;
@@ -60,6 +63,7 @@ type TutorChatProps = {
 export function TutorChat({ notebookID, sessionID }: TutorChatProps) {
   const router = useRouter();
   const generateThreadTitle = useServerFn(generateServerThreadTitle);
+  const { apiKey, isLoaded: isApiKeyLoaded } = useVercelAiGatewayApiKey();
   const [isModelSelectorOpen, setIsModelSelectorOpen] = useState(false);
   const [selectedModelId, setSelectedModelId] = useState<TutorModelId>(DEFAULT_TUTOR_MODEL);
   const [selectedReasoningLevel, setSelectedReasoningLevel] = useState<TutorReasoningLevel>(
@@ -71,12 +75,24 @@ export function TutorChat({ notebookID, sessionID }: TutorChatProps) {
   });
   const { messages, sendMessage, status, stop } = useAgentChat({
     agent,
-    body: () => ({
-      model: selectedModelId,
-      reasoningLevel: selectedReasoningLevel,
-    }),
+    prepareSendMessagesRequest: async () => {
+      if (!apiKey) {
+        throw new Error("Add a Vercel AI Gateway API key in Settings before using the tutor.");
+      }
+
+      const gatewayCredential = await agent.call<string>("prepareVercelAiGatewayKey", [apiKey]);
+
+      return {
+        body: {
+          gatewayCredential,
+          model: selectedModelId,
+          reasoningLevel: selectedReasoningLevel,
+        },
+      };
+    },
   });
   const isBusy = status === "submitted" || status === "streaming";
+  const canUseAI = isApiKeyLoaded && Boolean(apiKey);
   const selectedModel =
     TUTOR_MODELS.find((model) => model.id === selectedModelId) ?? TUTOR_MODELS[0];
   const providers = [...new Set(TUTOR_MODELS.map((model) => model.provider))];
@@ -134,12 +150,26 @@ export function TutorChat({ notebookID, sessionID }: TutorChatProps) {
         <ConversationScrollButton />
       </Conversation>
 
-      <div className="mx-auto w-full max-w-3xl px-4 pb-4">
+      <div className="mx-auto w-full max-w-3xl space-y-3 px-4 pb-4">
+        {isApiKeyLoaded && !apiKey ? (
+          <Alert>
+            <KeyRoundIcon />
+            <AlertTitle>Add an AI Gateway key to start chatting</AlertTitle>
+            <AlertDescription className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <span>
+                Your key is stored locally in this browser and is required for every model.
+              </span>
+              <Button asChild size="sm">
+                <Link to="/settings">Open settings</Link>
+              </Button>
+            </AlertDescription>
+          </Alert>
+        ) : null}
         <PromptInput
           className="rounded-xl bg-background shadow-sm"
           onSubmit={async ({ text }) => {
             const trimmedText = text.trim();
-            if (!trimmedText || isBusy) {
+            if (!trimmedText || isBusy || !apiKey) {
               return;
             }
 
@@ -155,6 +185,7 @@ export function TutorChat({ notebookID, sessionID }: TutorChatProps) {
                 sendMessagePromise,
                 generateThreadTitle({
                   data: {
+                    apiKey,
                     notebookId: notebookID,
                     question: trimmedText,
                     sessionId: sessionID,
@@ -171,8 +202,8 @@ export function TutorChat({ notebookID, sessionID }: TutorChatProps) {
           <PromptInputBody>
             <PromptInputTextarea
               aria-label="Message your tutor"
-              disabled={isBusy}
-              placeholder="Ask your tutor..."
+              disabled={isBusy || !canUseAI}
+              placeholder={canUseAI ? "Ask your tutor..." : "Add an API key in Settings to chat"}
             />
           </PromptInputBody>
           <PromptInputFooter>
@@ -182,7 +213,7 @@ export function TutorChat({ notebookID, sessionID }: TutorChatProps) {
                   <PromptInputButton
                     aria-label={`Select model. Current model: ${selectedModel.name}`}
                     className="max-w-40"
-                    disabled={isBusy}
+                    disabled={isBusy || !canUseAI}
                   >
                     <ModelSelectorLogo provider={selectedModel.id.split("/")[0]} />
                     <span className="truncate">{selectedModel.name}</span>
@@ -223,7 +254,7 @@ export function TutorChat({ notebookID, sessionID }: TutorChatProps) {
               </ModelSelector>
               {supportsTutorReasoning(selectedModelId) ? (
                 <PromptInputSelect
-                  disabled={isBusy}
+                  disabled={isBusy || !canUseAI}
                   onValueChange={(value) => {
                     if (isTutorReasoningLevel(value)) {
                       setSelectedReasoningLevel(value);
@@ -253,10 +284,14 @@ export function TutorChat({ notebookID, sessionID }: TutorChatProps) {
                   status === "error" && "text-destructive",
                 )}
               >
-                {status === "error" ? "Message failed. Try again." : "Enter to send"}
+                {!canUseAI
+                  ? "API key required"
+                  : status === "error"
+                    ? "Message failed. Check your key and try again."
+                    : "Enter to send"}
               </span>
             </div>
-            <PromptInputSubmit onStop={stop} status={status} />
+            <PromptInputSubmit disabled={!canUseAI} onStop={stop} status={status} />
           </PromptInputFooter>
         </PromptInput>
       </div>

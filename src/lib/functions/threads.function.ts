@@ -9,7 +9,7 @@ import type { OpenAILanguageModelResponsesOptions } from "@ai-sdk/openai";
 import { createServerFn } from "@tanstack/react-start";
 import { env } from "cloudflare:workers";
 import { and, desc, eq, max, sql } from "drizzle-orm";
-import { gateway, generateText } from "ai";
+import { createGateway, generateText } from "ai";
 import { getAgentByName } from "agents";
 import { z } from "zod";
 import { CHAT_TITLE_MODEL } from "#/lib/models";
@@ -55,6 +55,7 @@ export const getServerThreads = createServerFn({ method: "GET" })
 export const generateServerThreadTitle = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({
+      apiKey: z.string().trim().min(1).max(4_096),
       notebookId: z.string().brand<"NotebookId">(),
       question: titleQuestionSchema,
       sessionId: z.string().min(1),
@@ -96,13 +97,14 @@ export const generateServerThreadTitle = createServerFn({ method: "POST" })
     }
 
     try {
+      const aiGateway = createGateway({ apiKey: data.apiKey });
       const openaiOptions = {
         reasoningEffort: "minimal",
       } satisfies OpenAILanguageModelResponsesOptions;
       const { text } = await generateText({
         maxOutputTokens: 32,
         maxRetries: 1,
-        model: gateway(CHAT_TITLE_MODEL),
+        model: aiGateway(CHAT_TITLE_MODEL),
         prompt: data.question.slice(0, MAX_TITLE_QUESTION_LENGTH),
         providerOptions: {
           openai: openaiOptions,

@@ -17,6 +17,7 @@ Cloudflare agent, D1 for application and chat data, and R2 for uploaded PDFs.
 - Source-aware tutoring with tools that list and read notebook PDFs
 - Persistent chat threads with generated titles, renaming, and deletion
 - A choice of tutor models and reasoning levels
+- Per-browser Vercel AI Gateway keys stored in local storage
 - Resizable source, chat, and study-tool panels
 
 The Exam, Quiz, and Flashcards controls in the Studio panel are currently placeholders for future
@@ -68,7 +69,6 @@ http://localhost:3000/api/auth/callback/github
    BETTER_AUTH_SECRET=replace-with-a-long-random-secret
    GITHUB_CLIENT_ID=your-github-client-id
    GITHUB_CLIENT_SECRET=your-github-client-secret
-   AI_GATEWAY_API_KEY=your-ai-gateway-api-key
    ```
 
 3. Apply the D1 migrations to the local database:
@@ -83,8 +83,9 @@ http://localhost:3000/api/auth/callback/github
    pnpm dev
    ```
 
-The app is available at [http://localhost:3000](http://localhost:3000). Wrangler keeps local D1,
-R2, and Durable Object state under `.wrangler/`.
+The app is available at [http://localhost:3000](http://localhost:3000). After signing in, open
+Settings and add your Vercel AI Gateway API key before starting a chat. The key is stored in that
+browser's local storage. Wrangler keeps local D1, R2, and Durable Object state under `.wrangler/`.
 
 ## Commands
 

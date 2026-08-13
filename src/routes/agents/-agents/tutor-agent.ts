@@ -1,6 +1,7 @@
 import { Think, Session, type TurnContext } from "@cloudflare/think";
 import type { OpenAILanguageModelResponsesOptions } from "@ai-sdk/openai";
-import { gateway } from "ai";
+import { createGateway, gateway } from "ai";
+import { callable } from "agents";
 import { drizzle } from "drizzle-orm/d1";
 import { dbSchema } from "#/db/db-schema";
 import type { NotebookId } from "#/db/schema";
@@ -18,14 +19,40 @@ import { createReadNotebookFileTool } from "./tools/read-notebook-file";
 
 export class TutorAgent extends Think<Cloudflare.Env> {
   workspaceBash = false;
+  private readonly gatewayCredentials = new Map<
+    string,
+    { apiKey: string; disposeKeepAlive: () => void; expiresAt: number }
+  >();
 
   getModel() {
     return gateway(DEFAULT_TUTOR_MODEL);
   }
 
+  @callable()
+  async prepareVercelAiGatewayKey(apiKey: string): Promise<string> {
+    if (typeof apiKey !== "string" || apiKey.length > 4_096 || !apiKey.trim()) {
+      throw new Error("A valid Vercel AI Gateway API key is required.");
+    }
+
+    this.deleteExpiredGatewayCredentials();
+
+    const credential = crypto.randomUUID();
+    const disposeKeepAlive = await this.keepAlive();
+    this.gatewayCredentials.set(credential, {
+      apiKey: apiKey.trim(),
+      disposeKeepAlive,
+      expiresAt: Date.now() + 60_000,
+    });
+    setTimeout(() => this.deleteGatewayCredential(credential), 60_000);
+
+    return credential;
+  }
+
   override beforeTurn({ body }: TurnContext) {
     const modelId = isTutorModelId(body?.model) ? body.model : DEFAULT_TUTOR_MODEL;
-    const model = gateway(modelId);
+    const model = createGateway({
+      apiKey: this.consumeGatewayCredential(body?.gatewayCredential),
+    })(modelId);
 
     if (!supportsTutorReasoning(modelId)) {
       return { model };
@@ -47,6 +74,40 @@ export class TutorAgent extends Think<Cloudflare.Env> {
         openai: openaiOptions,
       },
     };
+  }
+
+  private consumeGatewayCredential(value: unknown): string {
+    if (typeof value !== "string") {
+      throw new Error("Add a Vercel AI Gateway API key in Settings before using the tutor.");
+    }
+
+    const credential = this.gatewayCredentials.get(value);
+    this.deleteGatewayCredential(value);
+
+    if (!credential || credential.expiresAt < Date.now()) {
+      throw new Error("Your AI Gateway credential expired. Send the message again.");
+    }
+
+    return credential.apiKey;
+  }
+
+  private deleteExpiredGatewayCredentials(): void {
+    const now = Date.now();
+    for (const [credential, value] of this.gatewayCredentials) {
+      if (value.expiresAt < now) {
+        this.deleteGatewayCredential(credential);
+      }
+    }
+  }
+
+  private deleteGatewayCredential(credential: string): void {
+    const value = this.gatewayCredentials.get(credential);
+    if (!value) {
+      return;
+    }
+
+    this.gatewayCredentials.delete(credential);
+    value.disposeKeepAlive();
   }
 
   getSystemPrompt() {

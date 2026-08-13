@@ -6,6 +6,7 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { cloudflare } from "@cloudflare/vite-plugin";
+import agents from "agents/vite";
 
 const ignorePatterns = [
   "src/routeTree.gen.ts",
@@ -25,6 +26,7 @@ const config = defineConfig({
     tsconfigPaths: true,
   },
   plugins: [
+    agents(),
     devtools(),
     cloudflare({ viteEnvironment: { name: "ssr" } }),
     tailwindcss(),

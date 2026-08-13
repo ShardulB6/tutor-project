@@ -1,4 +1,4 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import {
   createServerNotebook,
   deleteServerNotebook,
@@ -15,6 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { SettingsIcon } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/")({
   loader: async () => {
@@ -28,9 +29,17 @@ export const Route = createFileRoute("/_authenticated/")({
 
 function RouteComponent() {
   return (
-    <div className="p-4 gap-4 mx-auto">
-      <div>
-        <h1 className="text-2xl mx-auto font-bold">Notebooks</h1>
+    <div className="mx-auto max-w-6xl p-4">
+      <div className="flex items-center justify-between gap-4">
+        <h1 className="text-2xl font-bold">Notebooks</h1>
+        <Button asChild variant="outline">
+          <Link to="/settings">
+            <SettingsIcon />
+            Settings
+          </Link>
+        </Button>
+      </div>
+      <div className="mt-4">
         <CreateNotebookComponent />
       </div>
       <NotebooksComponent />

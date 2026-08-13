@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet, useRouter } from "@tanstack/react-router";
-import { CheckIcon, PencilIcon, PlusIcon, Trash2Icon, XIcon } from "lucide-react";
+import { CheckIcon, PencilIcon, PlusIcon, SettingsIcon, Trash2Icon, XIcon } from "lucide-react";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "#/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -266,7 +266,18 @@ export function AppSidebar({ notebook, notebookID, threads }: ChatSidebarProps) 
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter />
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Link to="/settings">
+                <SettingsIcon />
+                <span>Settings</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 }
