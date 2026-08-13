@@ -115,8 +115,10 @@ export function AppSidebar({ notebook, notebookID, threads }: ChatSidebarProps) 
   return (
     <Sidebar>
       <SidebarHeader>
-        <div>
-          <h3 style={{ margin: 0 }}>{notebook?.title}</h3>
+        <div className="px-2 text-center">
+          <h3 className="truncate font-semibold" title={notebook?.title}>
+            {notebook?.title}
+          </h3>
         </div>
         <SidebarMenu>
           <SidebarMenuItem>

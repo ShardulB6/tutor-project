@@ -29,7 +29,7 @@ export const Route = createFileRoute("/_authenticated/")({
 
 function RouteComponent() {
   return (
-    <div className="mx-auto max-w-6xl p-4">
+    <div className="p-4 gap-4 mx-auto">
       <div className="flex items-center justify-between gap-4">
         <h1 className="text-2xl font-bold">Notebooks</h1>
         <Button asChild variant="outline">
