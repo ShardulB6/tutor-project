@@ -9,7 +9,7 @@ import {
 } from "#/lib/functions/file.functions";
 import { MAX_FILE_TOPICS, MAX_FILE_TOPIC_LENGTH, parseFileTopicsInput } from "#/lib/file-topics";
 import { createFileRoute, Outlet, useRouter } from "@tanstack/react-router";
-import { CheckIcon, CircleHelpIcon, FileTextIcon, LayersIcon, Trash2Icon } from "lucide-react";
+import { CheckIcon, FileTextIcon, LayersIcon, Trash2Icon } from "lucide-react";
 import { type FormEvent, useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/$notebookID/_sidebar/_panel")({
@@ -226,10 +226,6 @@ function RouteComponent() {
             <Button type="button" variant="outline">
               <FileTextIcon />
               Exam
-            </Button>
-            <Button type="button" variant="outline">
-              <CircleHelpIcon />
-              Quiz
             </Button>
             <Button type="button" variant="outline">
               <LayersIcon />

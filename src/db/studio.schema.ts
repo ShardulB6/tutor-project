@@ -1,18 +1,31 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { z } from "zod";
 
-import { NotebooksTable, timestampColumns, type NotebookId } from "./schema";
-import { TITLE_STATUSES } from "./schema";
+import { NotebooksTable, TITLE_STATUSES, timestampColumns, type NotebookId } from "./schema";
 
-export const STUDIO_TYPES = ["exam", "quiz", "flashcards"] as const;
+export type ExamId = string & z.$brand<"ExamId">;
+export type FlashcardsId = string & z.$brand<"FlashcardsId">;
 
-export type StudioType = (typeof STUDIO_TYPES)[number];
-export type StudioId = string & z.$brand<"StudioId">;
+export type ExamQuestion = {
+  question: string;
+  choices?: string[];
+  answer: string;
+  explanation?: string;
+};
 
-export const studioTable = sqliteTable("studioTable", {
-  type: text("type", { enum: STUDIO_TYPES }).notNull(),
-  title: text().notNull(),
-  content: text("content", { mode: "json" }).notNull(),
+export type Flashcard = {
+  front: string;
+  back: string;
+};
+
+export const examsTable = sqliteTable("exams", {
+  id: text("id").$type<ExamId>().primaryKey(),
+  notebookID: text("notebook_id")
+    .$type<NotebookId>()
+    .references(() => NotebooksTable.id, { onDelete: "cascade" })
+    .notNull(),
+  title: text("title").notNull(),
+  questions: text("questions", { mode: "json" }).$type<ExamQuestion[]>().notNull(),
   sourceFileIds: text("source_file_ids", { mode: "json" }).$type<string[]>().default([]).notNull(),
   settings: text("settings", { mode: "json" })
     .$type<Record<string, unknown>>()
@@ -22,10 +35,25 @@ export const studioTable = sqliteTable("studioTable", {
   error: text("error"),
   schemaVersion: integer("schema_version").default(1).notNull(),
   status: text("title_status", { enum: TITLE_STATUSES }).default("pending").notNull(),
-  id: text("id").$type<StudioId>().notNull(),
+  ...timestampColumns,
+});
+
+export const flashcardsTable = sqliteTable("flashcards", {
+  id: text("id").$type<FlashcardsId>().primaryKey(),
   notebookID: text("notebook_id")
     .$type<NotebookId>()
     .references(() => NotebooksTable.id, { onDelete: "cascade" })
     .notNull(),
+  title: text("title").notNull(),
+  cards: text("cards", { mode: "json" }).$type<Flashcard[]>().notNull(),
+  sourceFileIds: text("source_file_ids", { mode: "json" }).$type<string[]>().default([]).notNull(),
+  settings: text("settings", { mode: "json" })
+    .$type<Record<string, unknown>>()
+    .default({})
+    .notNull(),
+  model: text("model"),
+  error: text("error"),
+  schemaVersion: integer("schema_version").default(1).notNull(),
+  status: text("title_status", { enum: TITLE_STATUSES }).default("pending").notNull(),
   ...timestampColumns,
 });

@@ -5,4 +5,6 @@ import { NotebooksTable } from "#/db/schema";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { ensureNotebook } from "./ensure.function";
-import { studioTable } from "#/db/studio.schema";
+import { examsTable, flashcardsTable } from "#/db/studio.schema";
+
+export const createStudioObject
