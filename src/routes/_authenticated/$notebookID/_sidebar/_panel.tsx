@@ -222,7 +222,7 @@ function RouteComponent() {
       <ResizablePanel defaultSize="20%" minSize="10%">
         <div className="flex shrink-0 flex-col items-center gap-3 px-4 py-4">
           <span className="font-semibold">Studio</span>
-          <div className="flex w-full flex-col gap-2">
+          {/* <div className="flex w-full flex-col gap-2">
             <Button type="button" variant="outline">
               <FileTextIcon />
               Exam
@@ -231,7 +231,7 @@ function RouteComponent() {
               <LayersIcon />
               Flashcards
             </Button>
-          </div>
+          </div> */}
         </div>
       </ResizablePanel>
     </ResizablePanelGroup>
