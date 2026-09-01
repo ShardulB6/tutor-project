@@ -17,3 +17,21 @@ export const ensureNotebook = createServerOnlyFn(async (notebookID: NotebookId) 
 
   return notebooksResult;
 });
+
+export const ensureThread = createServerOnlyFn(
+  async (notebookID: NotebookId, sessionID: string) => {
+    await ensureAuthSession();
+    await ensureNotebook(notebookID);
+
+    const thread = await db.query.ChatSessionsTable.findFirst({
+      where: (chatSession, { and, eq }) =>
+        and(eq(chatSession.notebookID, notebookID), eq(chatSession.sessionID, sessionID)),
+    });
+
+    if (thread === undefined) {
+      throw new Error("Thread not found");
+    }
+
+    return thread;
+  },
+);
