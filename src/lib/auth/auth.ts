@@ -6,7 +6,7 @@ import { env } from "../env";
 
 export const auth = betterAuth({
   emailAndPassword: {
-    enabled: false,
+    enabled: true,
   },
   socialProviders: {
     github: {
