@@ -87,6 +87,10 @@ The app is available at [http://localhost:3000](http://localhost:3000). After si
 Settings and add your Vercel AI Gateway API key before starting a chat. The key is stored in that
 browser's local storage. Wrangler keeps local D1, R2, and Durable Object state under `.wrangler/`.
 
+Use `pnpm db:migrate` or `pnpm exec wrangler` so local commands use the project's locked Wrangler
+version. `pnpx wrangler` can download a newer runtime that changes the local state format and
+prevents the installed development server from starting (for example, an `_cf_ALARM` column mismatch).
+
 ## Commands
 
 | Command                  | Purpose                                               |
