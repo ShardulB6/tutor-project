@@ -12,12 +12,20 @@ import {
 export type ExamId = string & z.$brand<"ExamId">;
 export type FlashcardsId = string & z.$brand<"FlashcardsId">;
 
-export type ExamQuestion = {
-  question: string;
-  choices?: string[];
-  answer: string;
-  explanation?: string;
-};
+export type ExamQuestion =
+  | {
+      type: "multiple-choice";
+      question: string;
+      choices: string[];
+      answer: string;
+      explanation?: string;
+    }
+  | {
+      type: "short-answer" | "long-answer";
+      question: string;
+      answer: string;
+      explanation?: string;
+    };
 
 export type Flashcard = {
   front: string;
