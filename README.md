@@ -11,7 +11,7 @@ Cloudflare agent, D1 for application and chat data, and R2 for uploaded PDFs.
 
 ## Features
 
-- GitHub sign-in with Better Auth but will have actual auth in the future
+- Uses Github and regular sign in.
 - Per-user notebooks and PDF source libraries
 - User-defined source topics that help the tutor select relevant files
 - Source-aware tutoring with tools that list and read notebook PDFs
