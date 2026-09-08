@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
@@ -20,6 +21,11 @@ import { Route as AuthenticatedNotebookIDSidebarPanelRouteImport } from './route
 import { Route as AuthenticatedNotebookIDSidebarPanelIndexRouteImport } from './routes/_authenticated/$notebookID/_sidebar/_panel.index'
 import { Route as AuthenticatedNotebookIDSidebarPanelChatIDRouteImport } from './routes/_authenticated/$notebookID/_sidebar/_panel.$chatID'
 
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -76,6 +82,7 @@ const AuthenticatedNotebookIDSidebarPanelChatIDRoute =
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/agents/$': typeof AgentsSplatRoute
   '/$notebookID': typeof AuthenticatedNotebookIDSidebarPanelRouteWithChildren
@@ -85,6 +92,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/agents/$': typeof AgentsSplatRoute
   '/': typeof AuthenticatedIndexRoute
@@ -96,6 +104,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/agents/$': typeof AgentsSplatRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
@@ -110,6 +119,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/signup'
     | '/settings'
     | '/agents/$'
     | '/$notebookID'
@@ -119,6 +129,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
+    | '/signup'
     | '/settings'
     | '/agents/$'
     | '/'
@@ -129,6 +140,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_authenticated'
     | '/login'
+    | '/signup'
     | '/_authenticated/settings'
     | '/agents/$'
     | '/_authenticated/'
@@ -142,12 +154,20 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
+  SignupRoute: typeof SignupRoute
   AgentsSplatRoute: typeof AgentsSplatRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -274,6 +294,7 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
+  SignupRoute: SignupRoute,
   AgentsSplatRoute: AgentsSplatRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
