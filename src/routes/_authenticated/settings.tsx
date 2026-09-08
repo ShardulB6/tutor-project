@@ -1,6 +1,6 @@
 "use client";
 
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   ArrowLeftIcon,
   CheckCircle2Icon,
@@ -8,6 +8,7 @@ import {
   EyeIcon,
   EyeOffIcon,
   KeyRoundIcon,
+  LogOutIcon,
   ShieldCheckIcon,
 } from "lucide-react";
 import { type FormEvent, useEffect, useState } from "react";
@@ -35,6 +36,7 @@ import {
   saveVercelAiGatewayApiKey,
   useVercelAiGatewayApiKey,
 } from "#/lib/vercel-ai-gateway-key";
+import { authClient } from "#/lib/auth/auth-client";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
@@ -46,6 +48,7 @@ export const Route = createFileRoute("/_authenticated/settings")({
 type SaveStatus = "idle" | "saved" | "removed" | "error";
 
 function SettingsPage() {
+  const navigate = useNavigate();
   const { apiKey, isLoaded } = useVercelAiGatewayApiKey();
   const [draftApiKey, setDraftApiKey] = useState("");
   const [isKeyVisible, setIsKeyVisible] = useState(false);
@@ -85,6 +88,11 @@ function SettingsPage() {
     }
   }
 
+  async function handleSignOut() {
+    await authClient.signOut();
+    await navigate({ to: "/login" });
+  }
+
   return (
     <div className="min-h-screen bg-muted/30">
       <header className="border-b bg-background">
@@ -94,10 +102,14 @@ function SettingsPage() {
               <ArrowLeftIcon />
             </Link>
           </Button>
-          <div>
+          <div className="flex-1">
             <p className="text-sm font-semibold">Tutor</p>
             <p className="text-xs text-muted-foreground">Settings</p>
           </div>
+          <Button onClick={handleSignOut} size="sm" variant="outline">
+            <LogOutIcon />
+            Sign out
+          </Button>
         </div>
       </header>
 

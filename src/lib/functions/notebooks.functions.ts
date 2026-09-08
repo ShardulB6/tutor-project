@@ -1,8 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { ensureAuthSession } from "../auth/auth.functions";
 import { db } from "#/db";
+import { files } from "#/db/file-schema";
 import { NotebooksTable } from "#/db/schema";
 import { createInsertSchema } from "drizzle-zod";
+import { env } from "cloudflare:workers";
 
 import { eq, and } from "drizzle-orm";
 import z from "zod";
@@ -69,6 +71,23 @@ export const deleteServerNotebook = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const session = await ensureAuthSession();
+    const notebook = await db.query.NotebooksTable.findFirst({
+      where: (notebook, { eq, and }) =>
+        and(eq(notebook.id, data.id), eq(notebook.userID, session.user.id)),
+    });
+    if (!notebook) {
+      throw new Error("Notebook not found");
+    }
+
+    const notebookFiles = await db
+      .select({ storageKey: files.storageKey })
+      .from(files)
+      .where(eq(files.notebookID, data.id));
+
+    const storageKeys = notebookFiles.flatMap((file) => (file.storageKey ? [file.storageKey] : []));
+    if (storageKeys.length > 0) {
+      await env.TUTOR_BUCKET.delete(storageKeys);
+    }
 
     await db
       .delete(NotebooksTable)
