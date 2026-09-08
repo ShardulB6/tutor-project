@@ -20,7 +20,7 @@ Cloudflare agent, D1 for application and chat data, and R2 for uploaded PDFs.
 - Per-browser Vercel AI Gateway keys stored in local storage
 - Resizable source, chat, and study-tool panels
 
-The Exam, Quiz, and Flashcards controls in the Studio panel are currently placeholders for future
+The Exam and Flashcards controls in the Studio panel are currently placeholders for future
 study tools.
 
 ## Architecture
