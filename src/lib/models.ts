@@ -5,6 +5,7 @@ export type TutorModel = {
 };
 
 export const CHAT_TITLE_MODEL = "openai/gpt-5-nano" as const;
+export const STUDIO_GENERATION_MODEL = "openai/gpt-5.6-luna" as const;
 
 export const TUTOR_MODELS = [
   {
