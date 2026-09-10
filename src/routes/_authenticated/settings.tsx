@@ -31,11 +31,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "#/components/ui/input-group";
-import {
-  removeVercelAiGatewayApiKey,
-  saveVercelAiGatewayApiKey,
-  useVercelAiGatewayApiKey,
-} from "#/lib/vercel-ai-gateway-key";
+import { removeVercelAiGatewayApiKey, useVercelAiGatewayApiKey } from "#/lib/vercel-ai-gateway-key";
 import { authClient } from "#/lib/auth/auth-client";
 
 export const Route = createFileRoute("/_authenticated/settings")({
@@ -49,16 +45,15 @@ type SaveStatus = "idle" | "saved" | "removed" | "error";
 
 function SettingsPage() {
   const navigate = useNavigate();
-  const { apiKey, isLoaded } = useVercelAiGatewayApiKey();
+  const { apiKey, isLoaded, saveApiKey } = useVercelAiGatewayApiKey();
   const [draftApiKey, setDraftApiKey] = useState("");
   const [isKeyVisible, setIsKeyVisible] = useState(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    if (isLoaded) {
-      setDraftApiKey(apiKey ?? "");
-    }
+    setDraftApiKey(isLoaded ? (apiKey ?? "") : "");
+    setIsKeyVisible(false);
   }, [apiKey, isLoaded]);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -66,7 +61,7 @@ function SettingsPage() {
     setErrorMessage("");
 
     try {
-      const savedApiKey = saveVercelAiGatewayApiKey(draftApiKey);
+      const savedApiKey = saveApiKey(draftApiKey);
       setDraftApiKey(savedApiKey);
       setSaveStatus("saved");
     } catch (error) {

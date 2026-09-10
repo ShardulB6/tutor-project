@@ -21,6 +21,7 @@ export const timestampColumns = {
 
 export const NotebooksTable = sqliteTable("notebook", {
   title: text().notNull(),
+  isDeleting: integer("is_deleting", { mode: "boolean" }).default(false).notNull(),
   id: text("id")
     .$type<NotebookId>()
     .primaryKey()

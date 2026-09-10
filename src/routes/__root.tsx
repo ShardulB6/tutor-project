@@ -4,6 +4,7 @@ import { TanStackDevtools } from "@tanstack/react-devtools";
 
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import { ThemeProvider } from "#/components/theme-provider";
+import { VercelAiGatewayKeySessionSync } from "#/lib/vercel-ai-gateway-key";
 
 import appCss from "../styles.css?url";
 
@@ -58,6 +59,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           enableSystem
           disableTransitionOnChange
         >
+          <VercelAiGatewayKeySessionSync />
           {children}
           <TanStackDevtools
             config={{

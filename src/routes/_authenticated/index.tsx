@@ -16,6 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { SettingsIcon } from "lucide-react";
+import { useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/")({
   loader: async () => {
@@ -83,6 +84,8 @@ export function NotebookCard({
 }) {
   const router = useRouter();
   const deleteNotebook = useServerFn(deleteServerNotebook);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   return (
     <Card className="relative max-w-sm border-0 pt-0 shadow-none ">
       <div className="absolute inset-0 z-30 aspect-video bg-black/35" />
@@ -99,6 +102,7 @@ export function NotebookCard({
       <CardFooter className="flex flex-col gap-2">
         <Button
           className="w-full"
+          disabled={isDeleting || notebook.isDeleting}
           onClick={() =>
             router.navigate({
               to: "/$notebookID",
@@ -111,13 +115,27 @@ export function NotebookCard({
         <Button
           className="w-full"
           variant="destructive"
+          disabled={isDeleting}
           onClick={async () => {
-            await deleteNotebook({ data: { id: notebook.id } });
-            await router.load();
+            setIsDeleting(true);
+            setDeleteError(null);
+            try {
+              await deleteNotebook({ data: { id: notebook.id } });
+            } catch {
+              setDeleteError("Could not finish deleting this notebook. Please retry.");
+            } finally {
+              setIsDeleting(false);
+              await router.invalidate();
+            }
           }}
         >
-          Delete Notebook
+          {isDeleting ? "Deleting…" : notebook.isDeleting ? "Retry deletion" : "Delete Notebook"}
         </Button>
+        {deleteError ? (
+          <p role="alert" className="text-sm text-destructive">
+            {deleteError}
+          </p>
+        ) : null}
       </CardFooter>
     </Card>
   );

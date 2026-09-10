@@ -71,12 +71,15 @@ export const deleteServerNotebook = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const session = await ensureAuthSession();
-    const notebook = await db.query.NotebooksTable.findFirst({
-      where: (notebook, { eq, and }) =>
-        and(eq(notebook.id, data.id), eq(notebook.userID, session.user.id)),
-    });
+    // Retain this deletion record if storage cleanup fails so a retry can
+    // finish the operation. New uploads are rejected once this flag is set.
+    const [notebook] = await db
+      .update(NotebooksTable)
+      .set({ isDeleting: true })
+      .where(and(eq(NotebooksTable.id, data.id), eq(NotebooksTable.userID, session.user.id)))
+      .returning({ id: NotebooksTable.id, userID: NotebooksTable.userID });
     if (!notebook) {
-      throw new Error("Notebook not found");
+      return { success: true };
     }
 
     const notebookFiles = await db
@@ -85,8 +88,18 @@ export const deleteServerNotebook = createServerFn({ method: "POST" })
       .where(eq(files.notebookID, data.id));
 
     const storageKeys = notebookFiles.flatMap((file) => (file.storageKey ? [file.storageKey] : []));
-    if (storageKeys.length > 0) {
-      await env.TUTOR_BUCKET.delete(storageKeys);
+    for (let offset = 0; offset < storageKeys.length; offset += 1_000) {
+      await env.TUTOR_BUCKET.delete(storageKeys.slice(offset, offset + 1_000));
+    }
+
+    // Also remove objects whose upload never committed database metadata.
+    // Drain the first page repeatedly instead of retaining a cursor while
+    // deleting its objects. The trailing slash isolates this notebook prefix.
+    const prefix = `${notebook.userID}/${notebook.id}/`;
+    while (true) {
+      const page = await env.TUTOR_BUCKET.list({ prefix, limit: 1_000 });
+      if (page.objects.length === 0) break;
+      await env.TUTOR_BUCKET.delete(page.objects.map((object) => object.key));
     }
 
     await db

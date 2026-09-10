@@ -36,6 +36,10 @@ export const saveFileSchema = createServerFn({ method: "POST" })
     });
 
     try {
+      // The notebook may have entered deletion while the upload was in flight.
+      // R2 already contains this object, so either deletion sees it or the
+      // catch block below rolls it back.
+      await ensureNotebook(data.notebookId);
       await db.insert(files).values({
         id,
         title: data.file.name,

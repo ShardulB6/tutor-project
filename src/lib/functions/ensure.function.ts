@@ -11,7 +11,7 @@ export const ensureNotebook = createServerOnlyFn(async (notebookID: NotebookId) 
     where: (NotebooksTable) =>
       and(eq(NotebooksTable.id, notebookID), eq(NotebooksTable.userID, session.user.id)),
   });
-  if (notebooksResult === undefined) {
+  if (notebooksResult === undefined || notebooksResult.isDeleting) {
     throw Error("unauthorized");
   }
 

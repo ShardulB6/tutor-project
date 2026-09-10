@@ -34,7 +34,11 @@ const ensureNotebookOwner = createMiddleware({ type: "request" }).server(
 
     const notebook = await db.query.NotebooksTable.findFirst({
       columns: { id: true },
-      where: and(eq(NotebooksTable.id, notebookId), eq(NotebooksTable.userID, session.user.id)),
+      where: and(
+        eq(NotebooksTable.id, notebookId),
+        eq(NotebooksTable.userID, session.user.id),
+        eq(NotebooksTable.isDeleting, false),
+      ),
     });
     if (!notebook) {
       return new Response("Forbidden", { status: 403 });

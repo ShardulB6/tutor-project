@@ -13,6 +13,15 @@ type ReadNotebookFileToolOptions = {
 
 export function createReadNotebookFileTool({ env, notebookId }: ReadNotebookFileToolOptions) {
   const database = drizzle(env.DB, { schema: dbSchema });
+  const fileReferenceSchema = z.object({ fileId: z.string().min(1) });
+
+  async function findNotebookFile(fileId: string) {
+    const file = await database.query.files.findFirst({
+      where: (files) => and(eq(files.id, fileId), eq(files.notebookID, notebookId)),
+    });
+    if (!file?.storageKey) throw new Error("Notebook file not found");
+    return { ...file, storageKey: file.storageKey };
+  }
 
   return tool({
     description: "Read a file attached to the current notebook.",
@@ -20,23 +29,20 @@ export function createReadNotebookFileTool({ env, notebookId }: ReadNotebookFile
       fileId: z.string().describe("The ID of the notebook file to read"),
     }),
     execute: async ({ fileId }) => {
-      const file = await database.query.files.findFirst({
-        where: (files) => and(eq(files.id, fileId), eq(files.notebookID, notebookId)),
-      });
-
-      if (!file?.storageKey) {
-        throw new Error("Notebook file not found");
-      }
+      const file = await findNotebookFile(fileId);
 
       return {
         fileId: file.id,
         filename: file.title,
         mediaType: file.contentType ?? "application/octet-stream",
-        storageKey: file.storageKey,
       };
     },
     toModelOutput: async ({ output }) => {
-      const object = await env.TUTOR_BUCKET.get(output.storageKey);
+      // Tool results in chat history are client-controlled. Reauthorize the
+      // file reference and derive its storage location from trusted metadata.
+      const { fileId } = fileReferenceSchema.parse(output);
+      const file = await findNotebookFile(fileId);
+      const object = await env.TUTOR_BUCKET.get(file.storageKey);
 
       if (!object) {
         throw new Error("Notebook file content not found");
@@ -48,8 +54,9 @@ export function createReadNotebookFileTool({ env, notebookId }: ReadNotebookFile
           {
             type: "file-data",
             data: Buffer.from(await object.arrayBuffer()).toString("base64"),
-            mediaType: object.httpMetadata?.contentType ?? output.mediaType,
-            filename: output.filename,
+            mediaType:
+              object.httpMetadata?.contentType ?? file.contentType ?? "application/octet-stream",
+            filename: file.title,
           },
         ],
       };
